@@ -50,9 +50,9 @@ export default function HunterLabPage(){
    if(Date.now()<timer.runningUntil)return;
    if(timer.mode==="focus"){
       const mins=Math.round(DURATIONS.focus/60);
-      const focusId=uid();
+      const focusId=String(timer.runningUntil);
       update(d=>({...d,sessions:[...d.sessions,{id:focusId,date:new Date().toISOString(),minutes:mins,label:timer.label.trim()||"Deep Work"}]}));
-      try{const earned=awardActivityXP("focus",focusId,20,"focus");setNotice(`FOCUS COMPLETE : +${earned.xp} EXP`)}catch(e){setStorageError(e instanceof Error?e.message:"Crédit EXP indisponible")};
+      try{const earned=awardActivityXP("focus",focusId,20,"focus");setNotice(earned.credited?`FOCUS COMPLETE : +${earned.xp} EXP`:"FOCUS : récompense déjà créditée")}catch(e){setStorageError(e instanceof Error?e.message:"Crédit EXP indisponible")};
       
    }else setNotice("PAUSE TERMINEE");
    setTimer(t=>({...t,runningUntil:null,secondsLeft:DURATIONS[t.mode]}));

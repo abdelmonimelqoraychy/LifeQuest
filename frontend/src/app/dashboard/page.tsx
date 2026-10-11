@@ -13,7 +13,7 @@ import { getCharacterEvolution, MAX_LEVEL } from "@/lib/characterEvolution";
 import { hasCompleted, isDue } from "@/lib/questSystem";
 import { useQuestSystem, type QuestReward } from "@/lib/useQuestSystem";
 import styles from "./CompactDashboard.module.css";
-import { attributeXP, getHunterProgress } from "@/lib/hunterCore";
+import { attributeXP, safeHunterProgress } from "@/lib/hunterCore";
 import rankStyles from "./RankLetter.module.css";
 
 const ATTRIBUTES = [
@@ -47,7 +47,7 @@ export default function DashboardPage() {
   const due = ready ? data.quests.filter(q => q.frequency === "daily" && isDue(q, currentDate)) : [];
   const cleared = due.filter(q => hasCompleted(q, data.completions, currentDate)).length;
   // Cap the displayed level at 100 without altering saved EXP or the legacy XP formula.
-  const hunterProgress = getHunterProgress(data.totalXP);
+  const hunterProgress = safeHunterProgress(data.totalXP);
   const level = Math.min(MAX_LEVEL, hunterProgress.level);
   // LifeQuest Hunter Rank 008C3 â€” no changes to XP or level calculation.
   const hunterRank = level >= 50 ? "S" : level >= 40 ? "A" : level >= 30 ? "B" : level >= 20 ? "C" : level >= 10 ? "D" : "E";
