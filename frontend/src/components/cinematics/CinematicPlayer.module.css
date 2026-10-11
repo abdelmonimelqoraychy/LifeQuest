@@ -1,0 +1,122 @@
+/* LifeQuest Mission 007.2 - video-sized cinematic frame.
+   All video clips are 16:9. No change to video files or XP state. */
+.cinema {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: min(100%, calc((100dvh - 24px) * 16 / 9));
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #000;
+  color: #f4faff;
+  border: 1px solid #30618b;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+/* Fullscreen events have a 16:9 player centered within the viewport.
+   The surrounding viewport is blacked out without cropping the film. */
+.fullscreen {
+  position: fixed;
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  width: min(100vw, calc(100dvh * 16 / 9));
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 0;
+  border: 0;
+  box-shadow: 0 0 0 100vmax #000;
+}
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: #000;
+}
+.video {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+.gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,rgba(0,0,0,.52),transparent 30%,transparent 55%,rgba(0,0,0,.78));
+}
+.top,.content,.controls { position:relative; z-index:1; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: #8fd4ff;
+}
+.content {
+  margin: auto 4% 3%;
+  max-width: 900px;
+  text-shadow: 0 2px 12px #000, 0 0 30px #000;
+}
+.eyebrow { color:#66ceff; font-size:12px; letter-spacing:.22em; }
+.content h1 {
+  font-size: clamp(20px, 4vw, 56px);
+  font-weight: 900;
+  letter-spacing: .06em;
+  margin: 8px 0;
+  text-transform: uppercase;
+  line-height: 1.06;
+}
+.content p {
+  max-width: 680px;
+  font-size: clamp(12px, 1.5vw, 18px);
+  line-height: 1.45;
+  color: #d9eaf8;
+}
+.controls { padding: 10px 20px 16px; }
+.track {
+  height: 3px;
+  background: #ffffff50;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.track div { height:100%; background:#71d6ff; transition:width .2s linear; }
+.actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; align-items:center; }
+.actions button {
+  border: 1px solid #85bfea70;
+  border-radius: 8px;
+  padding: 8px 13px;
+  color: #eaf7ff;
+  background: #091c32c9;
+  cursor: pointer;
+}
+.actions button:hover { background:#174067; }
+.actions .skip { margin-left:auto; border-color:#81d7ff; background:#075184; }
+@media (max-width: 600px) {
+  .cinema { border-radius:8px; }
+  .fullscreen { border-radius:0; }
+  .top { padding:8px 10px; font-size:8px; letter-spacing:.08em; }
+  .content { margin:auto 3% 2%; }
+  .eyebrow { font-size:9px; letter-spacing:.08em; }
+  .content h1 { font-size:clamp(14px,4.4vw,24px); margin:3px 0; }
+  .content p { font-size:10px; line-height:1.2; margin:0; }
+  .controls { padding:5px 10px 8px; }
+  .actions { gap:5px; margin-top:5px; }
+  .actions button { padding:5px 7px; font-size:10px; }
+}

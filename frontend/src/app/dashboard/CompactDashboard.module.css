@@ -1,0 +1,50 @@
+.dashboard{display:grid;gap:20px;max-width:1600px;margin:0 auto;color:#e6f6ff;font-family:inherit;min-width:0}
+.heroPanel,.questPanel,.attributePanel{position:relative;min-width:0;border:1px solid #2177a2;background:linear-gradient(150deg,#081c32 0%,#051326 67%,#040e1e 100%);box-shadow:0 0 28px #007bca12,inset 0 1px #40d6ff1b;overflow:hidden;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px)}
+.heroPanel{display:grid;grid-template-columns:minmax(0, .95fr) minmax(0,1.25fr);min-height:292px;padding:14px 17px;gap:13px;border-color:#31bdf3}
+.heroPanel:before,.questPanel:before,.attributePanel:before{content:"";position:absolute;top:0;left:0;width:90px;height:3px;background:#4be0ff;box-shadow:0 0 15px #39e0ff;z-index:3}
+.playerArea{position:relative;min-width:0;min-height:260px;overflow:hidden;background:radial-gradient(ellipse at 58% 62%,#073f7a77,transparent 63%)}
+.playerLabel{position:absolute;top:10px;left:9px;z-index:3;color:#72d8ff;font-size:12px;font-weight:800;letter-spacing:2.1px;text-shadow:0 0 12px #38bcff}
+.playerArtwork{position:absolute;inset:0;overflow:hidden}
+.heroImage{object-fit:cover;object-position:center 36%;filter:drop-shadow(0 0 12px #158ceb);mask-image:linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%)}
+.femaleFallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#7ed5ff;background:radial-gradient(circle,#0e4c7c,transparent 65%)}
+.femaleFallback span{letter-spacing:4px;font-size:12px}
+.playerIdentity{position:absolute;z-index:4;bottom:8px;left:9px;right:8px;max-width:235px;text-shadow:0 2px 10px #00101c;background:linear-gradient(90deg,#051325d9,transparent);padding:9px 8px;border-radius:8px}
+.rank{font-size:9px;letter-spacing:1.1px;color:#8ad5ff}.playerIdentity h2{font-size:clamp(17px,2vw,27px);margin:4px 0;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.playerIdentity>span{color:#9acaf2;font-size:11px}.playerExp{height:4px;background:#173c5b;border-radius:9px;margin-top:9px;max-width:180px}.playerExp>div{height:100%;border-radius:9px;background:#42d6ff}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-content:stretch;min-width:0}
+.metric{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:space-around;gap:9px;text-align:center;background:linear-gradient(155deg,#092440,#08172d);border:1px solid #1d689b;clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px);padding:15px 9px;color:#49c7ff}.metric>span{font-size:11px;font-weight:800;color:#96dcff;letter-spacing:.7px}.metric strong{color:#f5fbff;font-size:clamp(20px,2.35vw,34px);white-space:nowrap;letter-spacing:-.8px}.metricTrack{height:9px;border-radius:8px;background:#173751;width:100%;overflow:hidden}.metricTrack>div{height:100%;background:linear-gradient(90deg,#149fe0,#46e2ff);border-radius:9px;box-shadow:0 0 9px #23d1ff}
+.lowerGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;min-width:0;align-items:stretch}.questPanel,.attributePanel{height:440px;min-height:0;max-height:440px;padding:22px 24px 24px;display:flex;flex-direction:column}.sectionHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px;flex:none;min-height:37px}.sectionHeader h2{display:flex;align-items:center;gap:11px;font-size:clamp(15px,1.45vw,20px);color:#8ad9ff;letter-spacing:1.5px;margin:0}.sectionHeader h2 svg{color:#52daff}.sectionHeader>span{font-size:11px;letter-spacing:.5px;color:#83bddd;white-space:nowrap}
+.questScroll{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-color:#296b95 #071728;scrollbar-width:thin;display:flex;flex-direction:column;gap:6px;padding-right:6px}.questRow{appearance:none;width:100%;flex:none;min-height:61px;display:flex;align-items:center;gap:20px;text-align:left;background:linear-gradient(100deg,#0b2744,#071b32);border:1px solid #275a84;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);padding:8px 19px;color:#dceeff;cursor:pointer}.questRow:hover:not(:disabled){background:#123a5e;border-color:#48cdf5}.questRow:focus-visible{outline:2px solid #6ce3ff;outline-offset:-3px}.questDone{opacity:.85;cursor:default}.checkBox{display:grid;place-items:center;flex:none;width:29px;height:29px;border:2px solid #68a4d1;border-radius:4px;background:#071727;color:#e3faff}.questDone .checkBox{background:#17a5e7;border-color:#4ee7ff;box-shadow:0 0 12px #14c9ff88}.questTitle{font-size:14px;font-weight:700;min-width:0;overflow-wrap:anywhere}.emptyQuests{padding:32px 14px;text-align:center;color:#9dc9e4}.emptyQuests a{display:block;margin-top:12px;color:#70d9ff}
+.attributePanel{background:linear-gradient(160deg,#071c31,#051224)}.statsList{display:flex;flex-direction:column;gap:0;flex:1;min-height:0;justify-content:space-around}.statRow{display:grid;grid-template-columns:154px minmax(0,1fr) 35px;align-items:center;gap:12px;border-bottom:1px solid #1a3e5b;padding:14px 0}.statRow:last-child{border-bottom:0}.statName{display:flex;align-items:center;gap:12px;font-size:13px;color:#c2e1f7}.statTrack{width:100%;height:10px;background:#17354d;border-radius:7px;overflow:hidden}.statTrack>div{height:100%;border-radius:8px}.statRow strong{text-align:right;font-size:14px;color:#dcf7ff}.disclaimer{font-size:10px;color:#729bb8;margin:4px 0 0}.loading{padding:30px;color:#8bcff8}.error{padding:14px;color:#fff;background:#48202a;border:1px solid #aa4662;border-radius:8px;margin-bottom:12px}
+@media(max-width:1220px){.heroPanel{grid-template-columns:1fr;min-height:0}.playerArea{min-height:260px}.metrics{min-height:150px}.lowerGrid{gap:12px}.statRow{grid-template-columns:110px minmax(0,1fr) 28px;gap:7px}.statName{font-size:11px;gap:6px}.questPanel,.attributePanel{padding:18px}}
+@media(max-width:800px){.lowerGrid{grid-template-columns:1fr}.questPanel,.attributePanel{height:400px;max-height:400px}.heroPanel{padding:12px}.playerArea{min-height:240px}.metric strong{font-size:24px}}
+@media(max-width:500px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{min-height:130px}.heroPanel{gap:10px}.playerArea{min-height:245px}.sectionHeader{flex-wrap:wrap}.questPanel,.attributePanel{height:380px;max-height:380px}.statRow{grid-template-columns:104px minmax(0,1fr) 27px}.statTrack{height:8px}}
+
+/* 008-A.9: Level 5 character evolution. Layout and quest styling unchanged. */
+.awakened .heroImage{filter:drop-shadow(0 0 18px #24baff) saturate(1.26) contrast(1.1);animation:characterReveal 900ms ease-out both}
+.awakened .playerArtwork::after{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 51% 54%,#168bff21,transparent 69%);box-shadow:inset 0 0 28px #009cff33}
+@keyframes characterReveal{from{opacity:.65;transform:scale(1.05)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.awakened .heroImage{animation:none}}
+
+/* Mission 008-B: twenty evolving aura variants, five-level increments */
+.playerArea.awakened{background:radial-gradient(ellipse at 54% 60%,color-mix(in srgb,var(--evolution-aura,#24adff) 26%,transparent),transparent 67%)}
+.awakened .heroImage{filter:drop-shadow(0 0 18px var(--evolution-aura,#24adff)) saturate(1.16) contrast(1.07)}
+.awakened .playerArtwork::after{background:radial-gradient(ellipse at 52% 51%,color-mix(in srgb,var(--evolution-aura,#24adff) 17%,transparent),transparent 70%);box-shadow:inset 0 0 30px color-mix(in srgb,var(--evolution-aura,#24adff) 24%,transparent)}
+
+/* LIFEQUEST 008C7: compact layout. Data, quest behavior and artwork unchanged. */
+.dashboard { gap: 16px; }
+.heroPanel { grid-template-columns: minmax(0, .95fr) minmax(0, 1.25fr); min-height: 292px; padding: 14px 17px; gap: 13px; }
+.playerArea { min-height: 260px; }
+.heroImage { object-fit: cover; object-position: center 30%; }
+.metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.lowerGrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.questPanel, .attributePanel { height: 390px; max-height: 390px; min-height: 0; padding: 18px 20px; overflow: hidden; }
+.questScroll { flex: 1; min-height: 0; overflow-y: auto; gap: 5px; }
+.questRow { min-height: 39px; padding: 5px 10px; gap: 10px; flex-shrink: 0; transition: background .18s, border-color .18s; }
+.checkBox { width: 24px; height: 24px; flex: none; }
+.questTitle { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sectionHeader { min-height: 34px; margin-bottom: 12px; }
+.statRow { padding: 9px 0; }
+.statTrack { height: 9px; }
+@media(max-width:1220px) { .heroPanel { grid-template-columns: 1fr; } .lowerGrid { gap: 12px; } }
+@media(max-width:800px) { .lowerGrid { grid-template-columns: 1fr; } .questPanel, .attributePanel { height: 380px; max-height: 380px; } }
+@media(max-width:500px) { .heroPanel { padding: 10px; } .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .questPanel, .attributePanel { padding: 14px; height: 370px; max-height: 370px; } }

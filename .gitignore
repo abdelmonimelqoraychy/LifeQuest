@@ -1,0 +1,65 @@
+# Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Files and caches
+*.log
+.DS_Store
+Thumbs.db
+
+# Local backups
+*.bak
+*.backup
+frontend-backup-003A/
+
+frontend-git-backup/
+frontend/.git-disabled/
+
+# LifeQuest backups
+frontend-backup-003A/
+frontend-git-backup/
+frontend/.git-disabled/
+frontend/_lifequest_backups/
+frontend/lifequest-backups/
+frontend/LifeQuest_Backup_*/
+frontend/lifequest-backup-*/
+frontend/backup-before-*/
+
+# Backup files
+*.bak
+*.backup
+*.backup_*
+*.backup-*
+*.zip
+
+# Next.js and dependencies
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+
+*.backup.txt
+
+*.backup.txt
