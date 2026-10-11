@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import type { Attribute } from "@/types";
-import { ensureCoreSettings, getHunterProgress, bonusForStreak, streakDays, completionDays, applyDailyStability } from "@/lib/hunterCore";
+import { ensureCoreSettings, getHunterProgress, rewardMultiplier, streakDays, completionDays, applyDailyStability, getCoreSettings } from "@/lib/hunterCore";
 import { emptySystem, hasCompleted, isDue, loadState, localDate, newId, periodId, saveState, type Frequency, type QuestSystemState } from "@/lib/questSystem";
 
 export type QuestInput = {
@@ -24,9 +24,11 @@ export function useQuestSystem() {
         try { setData(loadState()); setError(""); } catch (e) { setError(e instanceof Error ? e.message : "Sauvegarde illisible"); }
       }
     };
+    const coreRefresh=()=>{try{setData(loadState());setError("")}catch(e){setError(e instanceof Error?e.message:"Sauvegarde illisible")}};
+    window.addEventListener("lifequest-core-updated",coreRefresh);
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", onStorage);
-    return () => { window.removeEventListener("focus", refresh); window.removeEventListener("storage", onStorage); };
+    return () => { window.removeEventListener("lifequest-core-updated",coreRefresh); window.removeEventListener("focus", refresh); window.removeEventListener("storage", onStorage); };
   }, []);
   const commit = useCallback((update: (prev: QuestSystemState) => QuestSystemState) => {
     if (!ready || error) return false;
@@ -58,7 +60,7 @@ export function useQuestSystem() {
       const q = prev.quests.find(item => item.id === id);
       if (!q || !isDue(q, now) || hasCompleted(q, prev.completions, now)) return prev;
       const period = periodId(q.frequency, now);
-      const bonus=bonusForStreak(streakDays(completionDays(prev.completions)));
+      const bonus=rewardMultiplier(streakDays(completionDays(prev.completions)),getCoreSettings(prev.totalXP).stability);
       const gained=Math.round(q.xp*bonus);
       reward = { title: q.title, xp: gained, levelBefore: getHunterProgress(prev.totalXP).level, levelAfter: getHunterProgress(prev.totalXP + gained).level };
       return { ...prev, totalXP: prev.totalXP + reward!.xp, completions: [...prev.completions, {

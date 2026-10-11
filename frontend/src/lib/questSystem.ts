@@ -36,12 +36,19 @@ export function hasCompleted(q: SystemQuest, completions: Completion[], now: Dat
 }
 export function newId() { return typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
 const ATTRS: Attribute[] = ["focus", "discipline", "knowledge", "energy", "consistency"];
+const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+const finiteNonNegative = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v >= 0;
+const validDate = (v: unknown): v is string => typeof v === "string" && !Number.isNaN(Date.parse(v));
 export function validState(input: unknown): input is QuestSystemState {
-  if (!input || typeof input !== "object") return false;
-  const x = input as Partial<QuestSystemState>;
-  return x.version === 1 && typeof x.totalXP === "number" && Number.isFinite(x.totalXP) && x.totalXP >= 0 && Array.isArray(x.quests) && Array.isArray(x.arcs) && Array.isArray(x.completions)
-    && x.quests.every(q => typeof q.id === "string" && typeof q.title === "string" && typeof q.xp === "number" && Number.isFinite(q.xp) && q.xp >= 0 && q.xp <= 300 && ["daily","weekly","monthly","once"].includes(q.frequency) && ATTRS.includes(q.attribute))
-    && x.completions.every(c => typeof c.questId === "string" && typeof c.period === "string" && typeof c.xpAwarded === "number");
+  if (!isRecord(input)) return false;
+  const x=input;
+  if (x.version!==1 || !finiteNonNegative(x.totalXP) || !Array.isArray(x.quests) || !Array.isArray(x.arcs) || !Array.isArray(x.completions)) return false;
+  if (!x.quests.every((q: unknown) => isRecord(q) && typeof q.id==="string" && q.id.length>0 && typeof q.title==="string" && finiteNonNegative(q.xp) && q.xp<=300 && ["daily","weekly","monthly","once"].includes(String(q.frequency)) && ATTRS.includes(q.attribute as Attribute) && validDate(q.createdAt) && (q.archived===undefined || typeof q.archived==="boolean"))) return false;
+  if (!x.arcs.every((a: unknown) => isRecord(a) && typeof a.id==="string" && typeof a.title==="string" && typeof a.targetDate==="string" && validDate(a.createdAt))) return false;
+  if (!x.completions.every((c: unknown) => isRecord(c) && typeof c.id==="string" && typeof c.questId==="string" && typeof c.period==="string" && validDate(c.completedAt) && finiteNonNegative(c.xpAwarded) && ATTRS.includes(c.attribute as Attribute))) return false;
+  const eventKeys=new Set<string>();
+  for(const c of x.completions as Completion[]){const key=`${c.questId}\u0000${c.period}`;if(eventKeys.has(key))return false;eventKeys.add(key);}
+  return true;
 }
 export function loadState(): QuestSystemState {
   try {
@@ -58,11 +65,12 @@ export function loadState(): QuestSystemState {
     // Legacy demo quests are not imported: past EXP is retained and default tasks disappear.
     return { ...emptySystem, totalXP: xp };
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("Sauvegarde LifeQuest")) throw error;
-    return { ...emptySystem };
+    // Never interpret malformed JSON or an invalid legacy record as a fresh account.
+    throw Error(`Sauvegarde LifeQuest illisible : ${error instanceof Error ? error.message : "erreur inconnue"}. Aucune modification.`);
   }
 }
 export function saveState(state: QuestSystemState) {
+  if(!validState(state)) throw Error("Enregistrement refuse : état de progression invalide.");
   // The new save is primary; old key is only updated for level-dependent legacy widgets.
   window.localStorage.setItem(SYSTEM_KEY, JSON.stringify(state));
   const oldRaw = window.localStorage.getItem(LEGACY_KEY);
