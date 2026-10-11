@@ -63,3 +63,5 @@ dist/
 *.backup.txt
 
 *.backup.txt
+
+.lifequest-install-backups/
