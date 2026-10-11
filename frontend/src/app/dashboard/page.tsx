@@ -13,6 +13,7 @@ import { getCharacterEvolution, MAX_LEVEL } from "@/lib/characterEvolution";
 import { hasCompleted, isDue } from "@/lib/questSystem";
 import { useQuestSystem, type QuestReward } from "@/lib/useQuestSystem";
 import styles from "./CompactDashboard.module.css";
+import { attributeXP, getHunterProgress } from "@/lib/hunterCore";
 import rankStyles from "./RankLetter.module.css";
 
 const ATTRIBUTES = [
@@ -46,14 +47,15 @@ export default function DashboardPage() {
   const due = ready ? data.quests.filter(q => q.frequency === "daily" && isDue(q, currentDate)) : [];
   const cleared = due.filter(q => hasCompleted(q, data.completions, currentDate)).length;
   // Cap the displayed level at 100 without altering saved EXP or the legacy XP formula.
-  const level = Math.min(MAX_LEVEL, getLevel(data.totalXP));
+  const hunterProgress = getHunterProgress(data.totalXP);
+  const level = Math.min(MAX_LEVEL, hunterProgress.level);
   // LifeQuest Hunter Rank 008C3 â€” no changes to XP or level calculation.
   const hunterRank = level >= 50 ? "S" : level >= 40 ? "A" : level >= 30 ? "B" : level >= 20 ? "C" : level >= 10 ? "D" : "E";
   const hunterRankColor = { E: "#afc1d0", D: "#72ceff", C: "#44e8c9", B: "#aa88ff", A: "#ffd471", S: "#ff6ea7" }[hunterRank];
   const evolution = getCharacterEvolution(level);
   const characterAwakened = evolution.stage > 0;
   const hunterPortrait = evolution.image;
-  const progress = Math.round((data.totalXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100);
+  const progress = hunterProgress.percent;
   const completion = due.length ? Math.round(cleared * 100 / due.length) : 0;
   const totalDone = data.quests.filter(q => !q.archived && hasCompleted(q, data.completions, currentDate));
 
@@ -113,10 +115,11 @@ export default function DashboardPage() {
         <section className={styles.attributePanel} aria-label="PLAYER ATTRIBUTES">
           <header className={styles.sectionHeader}><h2><Shield size={23}/> [ PLAYER ATTRIBUTES ]</h2></header>
           <div className={styles.statsList}>{ATTRIBUTES.map(({key,label,Icon,color})=>{
-            const value = Math.min(100,30 + totalDone.filter(q=>q.attribute===key).length*18 + (key === "consistency" ? totalDone.length*7 : 0));
+            const value = attributeXP(data.completions)[key];
+            const maxAttribute = Math.max(100,...Object.values(attributeXP(data.completions)));
             return <div className={styles.statRow} key={key}>
               <div className={styles.statName}><Icon size={21} style={{color}}/><span>{label}</span></div>
-              <div className={styles.statTrack}><div style={{width:`${value}%`,background:color,boxShadow:`0 0 12px ${color}44`}} /></div><strong>{value}</strong>
+              <div className={styles.statTrack}><div style={{width:`${Math.min(100,Math.round(value/maxAttribute*100))}%`,background:color,boxShadow:`0 0 12px ${color}44`}} /></div><strong>{value}</strong>
             </div>;
           })}</div>
           <p className={styles.disclaimer}>Attributs ludiques, non mesures scientifiques.</p>
