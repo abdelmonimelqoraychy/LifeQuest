@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import type { Attribute } from "@/types";
+import { ensureCoreSettings, getHunterProgress, bonusForStreak, streakDays, completionDays, applyDailyStability } from "@/lib/hunterCore";
 import { emptySystem, hasCompleted, isDue, loadState, localDate, newId, periodId, saveState, type Frequency, type QuestSystemState } from "@/lib/questSystem";
 
 export type QuestInput = {
@@ -14,7 +15,7 @@ export function useQuestSystem() {
   const [error, setError] = useState("");
   const [today, setToday] = useState("");
   useEffect(() => {
-    try { setData(loadState()); } catch (e) { setError(e instanceof Error ? e.message : "Impossible de charger la sauvegarde"); }
+    try { const existing=loadState(); ensureCoreSettings(existing.totalXP); applyDailyStability(); setData(existing); } catch (e) { setError(e instanceof Error ? e.message : "Impossible de charger la sauvegarde"); }
     setToday(localDate(new Date()));
     setReady(true);
     const refresh = () => setToday(localDate(new Date()));
@@ -57,9 +58,11 @@ export function useQuestSystem() {
       const q = prev.quests.find(item => item.id === id);
       if (!q || !isDue(q, now) || hasCompleted(q, prev.completions, now)) return prev;
       const period = periodId(q.frequency, now);
-      reward = { title: q.title, xp: q.xp, levelBefore: Math.floor(prev.totalXP / 300) + 1, levelAfter: Math.floor((prev.totalXP + q.xp) / 300) + 1 };
-      return { ...prev, totalXP: prev.totalXP + q.xp, completions: [...prev.completions, {
-        id: newId(), questId: id, period, completedAt: now.toISOString(), xpAwarded: q.xp, attribute: q.attribute,
+      const bonus=bonusForStreak(streakDays(completionDays(prev.completions)));
+      const gained=Math.round(q.xp*bonus);
+      reward = { title: q.title, xp: gained, levelBefore: getHunterProgress(prev.totalXP).level, levelAfter: getHunterProgress(prev.totalXP + gained).level };
+      return { ...prev, totalXP: prev.totalXP + reward!.xp, completions: [...prev.completions, {
+        id: newId(), questId: id, period, completedAt: now.toISOString(), xpAwarded: reward!.xp, attribute: q.attribute,
       }] };
     });
     return ok ? reward : null;

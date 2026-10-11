@@ -1,0 +1,10 @@
+.page{max-width:1450px;margin:0 auto;color:#dceeff;display:grid;gap:22px;padding:12px 0 40px}
+.page h1{font-size:clamp(23px,3vw,38px);margin:8px 0;color:#fff;letter-spacing:2px}
+.page h2{font-size:17px;color:#83dcff;letter-spacing:1.5px;margin:0 0 16px}
+.page p{color:#a1bed8;line-height:1.6}.eyebrow{color:#45d6ff;letter-spacing:2px;font-size:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tiles article,.panel{border:1px solid #21618d;background:linear-gradient(145deg,#0a2441,#041324);padding:20px;box-shadow:inset 0 1px 0 #54cfff20}
+.tiles article{display:flex;flex-direction:column;gap:12px}.tiles span{font-size:12px;color:#95ccf2;letter-spacing:1px}.tiles strong{font-size:clamp(26px,3vw,42px);color:#fff;text-shadow:0 0 18px #1badeb66}.tiles small,.panel small{font-size:12px;color:#85a8c1}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.attr{display:grid;grid-template-columns:115px 1fr 85px;gap:12px;align-items:center;padding:9px 0;font-size:12px}.track{height:9px;background:#173b5a;border-radius:8px;overflow:hidden}.track>div{height:100%;background:linear-gradient(90deg,#1674c4,#4de4ff);box-shadow:0 0 10px #27bbff}.attr b{text-align:right}
+.links,.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.links a,.actions button,.upload{color:#dcf8ff;background:#113b5e;border:1px solid #2f91c8;padding:12px 15px;font-size:12px;font-weight:700;cursor:pointer}.upload input{display:none}.log{max-height:270px;overflow:auto}.log>div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #154267;padding:10px 0;font-size:13px}.log strong{color:#71e3ff}.error{padding:14px;border:1px solid #d96666;color:#ffe0e0!important}.success{padding:14px;border:1px solid #57ae95;color:#a1ffe6!important}
+@media(max-width:960px){.tiles{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}@media(max-width:500px){.tiles{grid-template-columns:1fr 1fr}.tiles article{padding:11px}.attr{grid-template-columns:85px 1fr 70px;gap:7px}}
