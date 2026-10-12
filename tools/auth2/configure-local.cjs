@@ -2,10 +2,11 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
+const {randomBytes}=require('node:crypto');
 const root=path.resolve(__dirname,'../..');
 const destination=path.join(root,'frontend/.env.local');
 if(fs.existsSync(destination))throw Error('Existing .env.local preserved; configure manually without exposing values.');
 const config=JSON.parse(execFileSync(process.execPath,[path.join(__dirname,'node_modules/supabase/dist/supabase.js'),'status','--workdir',root,'--output','json'],{encoding:'utf8',stdio:['ignore','pipe','pipe']}));
 if(!['127.0.0.1','localhost'].includes(new URL(config.API_URL).hostname)||!config.PUBLISHABLE_KEY?.startsWith('sb_publishable_'))throw Error('Local public configuration required');
-fs.writeFileSync(destination,`NEXT_PUBLIC_SUPABASE_URL=${config.API_URL}\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${config.PUBLISHABLE_KEY}\nAPP_ORIGIN=http://127.0.0.1:3000\n`,{flag:'wx'});
-console.log('Local public configuration written to ignored .env.local; no private credential exported.');
+fs.writeFileSync(destination,`NEXT_PUBLIC_SUPABASE_URL=${config.API_URL}\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${config.PUBLISHABLE_KEY}\nAPP_ORIGIN=http://127.0.0.1:3000\nAUTH_RECOVERY_SECRET=${randomBytes(48).toString('hex')}\n`,{flag:'wx'});
+console.log('Local configuration written to ignored .env.local; recovery signing key generated, all values suppressed.');

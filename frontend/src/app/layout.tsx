@@ -1,6 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import StorageAccessBoundary from '@/components/system/StorageAccessBoundary';
 export const metadata: Metadata = {
   title: "LifeQuest — Real World Leveling",
   description: "Transforme tes objectifs en quêtes et progresse à ton rythme.",
@@ -13,7 +12,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-scroll-behavior="smooth"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col"><StorageAccessBoundary>{children}</StorageAccessBoundary></body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

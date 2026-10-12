@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseConfig } from './config';
+import { appOrigin } from '@/lib/auth/requests';
 
 export async function refreshAuthSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -8,6 +9,7 @@ export async function refreshAuthSession(request: NextRequest) {
   try {
     const { url, key } = supabaseConfig();
     const supabase = createServerClient(url, key, {
+      cookieOptions: { secure: appOrigin().startsWith('https://'), sameSite: 'lax' },
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: values => {

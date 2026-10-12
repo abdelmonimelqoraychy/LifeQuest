@@ -4,6 +4,7 @@ const {execFileSync}=require('node:child_process');
 const {randomUUID,randomBytes,createHmac}=require('node:crypto');
 const path=require('node:path');
 const {Client}=require('pg');
+const {confirmationLink}=require('./mail-fixture.cjs');
 const root=path.resolve(__dirname,'../..');
 const {createServerClient}=require(path.join(root,'frontend/node_modules/@supabase/ssr'));
 const base=process.env.LIFEQUEST_TEST_URL||'http://127.0.0.1:3102';
@@ -20,7 +21,13 @@ async function run(){
  console.log('PASS bootstrap anonymous refused');
  async function fixture(){
   const jar=new Map();const client=createServerClient(config.API_URL,config.PUBLISHABLE_KEY,{cookies:{getAll:()=>[...jar].map(([name,value])=>({name,value})),setAll:values=>{for(const v of values)jar.set(v.name,v.value);}}});
-  const result=await client.auth.signUp({email:`auth2-app-${randomUUID()}@example.test`,password:randomBytes(24).toString('hex')});
+  const email=`auth2-app-${randomUUID()}@example.test`;
+  let result=await client.auth.signUp({email,password:randomBytes(24).toString('hex'),options:{emailRedirectTo:'http://127.0.0.1:3000/auth/confirm'}});
+  if (!result.error && !result.data.session) {
+   users.push(result.data.user.id);
+   const link=await confirmationLink(email);
+   result=await client.auth.verifyOtp({type:'email',token_hash:link.searchParams.get('token_hash')});
+  }
   assert.equal(result.error,null);assert.ok(result.data.session);users.push(result.data.user.id);
   return {client,jar,id:result.data.user.id,cookie:()=>[...jar].map(([name,value])=>`${name}=${value}`).join('; ')};
  }

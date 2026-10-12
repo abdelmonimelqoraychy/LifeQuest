@@ -6,6 +6,7 @@ const {randomUUID, randomBytes, createHmac} = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const {Client, Pool} = require('pg');
+const {confirmationLink} = require('./mail-fixture.cjs');
 const root = path.resolve(__dirname, '../..');
 const cli = path.join(__dirname, 'node_modules/supabase/dist/supabase.js');
 const docker = process.env.LIFEQUEST_DOCKER || path.join(process.env.LOCALAPPDATA, 'Programs/DockerDesktop/resources/bin/docker.exe');
@@ -38,8 +39,14 @@ async function run() {
     return {status:response.status,data};
   }
   async function signup(label) {
-    const result = await request('/auth/v1/signup',null,{email:`auth2-${label}-${randomUUID()}@example.test`,password:randomBytes(24).toString('hex')},'POST');
+    const email = `auth2-${label}-${randomUUID()}@example.test`;
+    let result = await request('/auth/v1/signup?redirect_to='+encodeURIComponent('http://127.0.0.1:3000/auth/confirm'),null,{email,password:randomBytes(24).toString('hex')},'POST');
     assert.equal(result.status,200,'FICTITIOUS_SIGNUP_FAILED');
+    if (!result.data.access_token) {
+      fixtureUsers.push(result.data.id);
+      const link = await confirmationLink(email);
+      result = await request('/auth/v1/verify',null,{token_hash:link.searchParams.get('token_hash'),type:'email'},'POST');
+    }
     assert.ok(result.data.access_token && result.data.user.id,'LOCAL_CONFIRMATION_CONFIG_REQUIRED');
     fixtureUsers.push(result.data.user.id);
     await admin.query('insert into auth2_proof.progress(user_id) values ($1)',[result.data.user.id]);

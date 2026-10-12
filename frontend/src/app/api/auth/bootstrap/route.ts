@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -8,6 +9,7 @@ const failure = (code: string, status: number) => NextResponse.json({ code }, { 
 
 export async function GET() {
   try {
+    if ((await cookies()).get('lifequest-access-locked')?.value === '1') return failure('AUTH_REQUIRED', 401);
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.getUser();
     if (error) return failure(error.status && error.status >= 500 ? 'AUTH_UNAVAILABLE' : 'AUTH_REQUIRED', error.status && error.status >= 500 ? 503 : 401);
