@@ -1,16 +1,19 @@
 "use client";
+import Modal from '@/components/ui/Modal';
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Brain, Check, ClipboardCheck, Crown, Flame, Focus, HeartPulse, Repeat2, Shield, Target, UserRound, Zap } from "lucide-react";
-import LevelCinematicGate from "@/components/cinematics/LevelCinematicGate";
+import LevelCinematicGate, {usePendingCinematic} from "@/components/cinematics/LevelCinematicGate";
 import HunterTransition from "@/components/hunter/HunterTransition";
 import SystemShell from "@/components/system/SystemShell";
-import { getLevel, XP_PER_LEVEL } from "@/data/mockPlayer";
+import {rankForLevel} from "@/lib/hunterMissions";
+import {readProfile,PROFILE_KEY} from "@/lib/profile";
+import {useStoredData} from "@/lib/useStoredData";
 import { getCharacterEvolution, MAX_LEVEL } from "@/lib/characterEvolution";
-import { hasCompleted, isDue } from "@/lib/questSystem";
+import { completionIndex, hasCompleted, isDue } from "@/lib/questSystem";
 import { useQuestSystem, type QuestReward } from "@/lib/useQuestSystem";
 import styles from "./CompactDashboard.module.css";
 import { attributeXP, safeHunterProgress } from "@/lib/hunterCore";
@@ -28,40 +31,29 @@ export default function DashboardPage() {
   const system = useQuestSystem();
   const { data, currentDate, ready, error } = system;
   const [notice, setNotice] = useState<QuestReward | null>(null);
-  const [playerName, setPlayerName] = useState("HUNTER");
-  const [avatar, setAvatar] = useState<"male" | "female" | null>(null);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("lifequest-profile-v1");
-      if (!raw) return;
-      const profile: unknown = JSON.parse(raw);
-      if (profile && typeof profile === "object") {
-        const p = profile as { name?: unknown; avatar?: unknown };
-        if (typeof p.name === "string" && p.name.trim()) setPlayerName(p.name.trim());
-        if (p.avatar === "male" || p.avatar === "female") setAvatar(p.avatar);
-      }
-    } catch { /* Preserve default presentation if the profile is unreadable. */ }
-  }, []);
-
+  const profile=useStoredData(PROFILE_KEY,readProfile,null);
+  const playerName=profile.data?.name||'HUNTER',avatar=profile.data?.avatar;
+  const totals=useMemo(()=>attributeXP(data.completions),[data.completions]);
+  const completed=useMemo(()=>completionIndex(data.completions),[data.completions]);
+  const maxAttribute=Math.max(100,...Object.values(totals));
   const due = ready ? data.quests.filter(q => q.frequency === "daily" && isDue(q, currentDate)) : [];
-  const cleared = due.filter(q => hasCompleted(q, data.completions, currentDate)).length;
+  const cleared = due.filter(q => hasCompleted(q, completed, currentDate)).length;
   // Cap the displayed level at 100 without altering saved EXP or the legacy XP formula.
   const hunterProgress = safeHunterProgress(data.totalXP);
   const level = Math.min(MAX_LEVEL, hunterProgress.level);
   // LifeQuest Hunter Rank 008C3 â€” no changes to XP or level calculation.
-  const hunterRank = level >= 50 ? "S" : level >= 40 ? "A" : level >= 30 ? "B" : level >= 20 ? "C" : level >= 10 ? "D" : "E";
+  const hunterRank = rankForLevel(level);
   const hunterRankColor = { E: "#afc1d0", D: "#72ceff", C: "#44e8c9", B: "#aa88ff", A: "#ffd471", S: "#ff6ea7" }[hunterRank];
   const evolution = getCharacterEvolution(level);
   const characterAwakened = evolution.stage > 0;
   const hunterPortrait = evolution.image;
+  const pendingCinematic=usePendingCinematic(level,ready&&!error&&!notice);
   const progress = hunterProgress.percent;
   const completion = due.length ? Math.round(cleared * 100 / due.length) : 0;
-  const totalDone = data.quests.filter(q => !q.archived && hasCompleted(q, data.completions, currentDate));
 
-  function completeQuest(id: string) {
+  async function completeQuest(id: string) {
     if (error || !ready || notice) return;
-    const reward = system.completeQuest(id);
+    const reward = await system.completeQuest(id);
     if (reward) setNotice(reward);
   }
 
@@ -71,7 +63,7 @@ export default function DashboardPage() {
       <span className={rankStyles.rankLetter}>{hunterRank}</span>
     </div>
     <LevelCinematicGate level={level} ready={ready && !error && !notice} />
-    <HunterTransition level={level} portrait={hunterPortrait} ready={ready && !error && !notice} />
+    <HunterTransition level={level} portrait={hunterPortrait} ready={ready && !error && !notice && pendingCinematic===null} />
     {error && <div className={styles.error} role="alert">SYSTEM STORAGE ERROR: {error}. Aucune donnée ne sera écrasée.</div>}
     {!ready ? <div className={styles.loading}>SYSTEM LOADING...</div> : <div className={styles.dashboard}>
       <section className={styles.heroPanel} aria-label="PLAYER STATUS AND METRICS">
@@ -104,28 +96,33 @@ export default function DashboardPage() {
         <section className={styles.questPanel} aria-labelledby="daily-title">
           <header className={styles.sectionHeader}><h2 id="daily-title"><Target size={23}/> [ DAILY QUESTS ]</h2><span>{cleared} / {due.length} CLEARED</span></header>
           <div className={styles.questScroll}>
-            {due.length === 0 ? <div className={styles.emptyQuests}>Aucune DAILY QUEST aujourd'hui. <Link href="/quests">Ouvrir QUEST LOG</Link></div> : due.map(q => {
-              const checked = hasCompleted(q, data.completions, currentDate);
+            {due.length === 0 ? <div className={styles.emptyQuests}>Aucune DAILY QUEST aujourd’hui. <Link href="/quests">Ouvrir QUEST LOG</Link></div> : due.map(q => {
+              const checked = hasCompleted(q, completed, currentDate);
               return <button type="button" key={q.id} className={`${styles.questRow} ${checked ? styles.questDone : ""}`} disabled={checked || !!error || !!notice} onClick={()=>completeQuest(q.id)} aria-label={checked ? `${q.title}, terminée` : `Terminer ${q.title}`} aria-pressed={checked}>
                 <span className={styles.checkBox} aria-hidden="true">{checked && <Check size={20} strokeWidth={3}/>}</span><span className={styles.questTitle}>{q.title}</span>
               </button>;
             })}
           </div>
         </section>
-        <section className={styles.attributePanel} aria-label="PLAYER ATTRIBUTES">
-          <header className={styles.sectionHeader}><h2><Shield size={23}/> [ PLAYER ATTRIBUTES ]</h2></header>
+        <section className={styles.attributePanel} aria-labelledby="attributes-title">
+          <header className={styles.sectionHeader}><h2 id="attributes-title"><Shield size={23} aria-hidden="true"/> [ PLAYER ATTRIBUTES ]</h2></header>
+          <div className={styles.attributeSummary}>
+            <p>XP cumulés par attribut, issus des validations enregistrées.</p>
+            <p id="attribute-scale" className={styles.attributeScale}>Échelle commune : 0–{maxAttribute.toLocaleString('fr-FR')} XP</p>
+          </div>
           <div className={styles.statsList}>{ATTRIBUTES.map(({key,label,Icon,color})=>{
-            const value = attributeXP(data.completions)[key];
-            const maxAttribute = Math.max(100,...Object.values(attributeXP(data.completions)));
+            const value = totals[key];
+            const formatted = value.toLocaleString('fr-FR');
             return <div className={styles.statRow} key={key}>
-              <div className={styles.statName}><Icon size={21} style={{color}}/><span>{label}</span></div>
-              <div className={styles.statTrack}><div style={{width:`${Math.min(100,Math.round(value/maxAttribute*100))}%`,background:color,boxShadow:`0 0 12px ${color}44`}} /></div><strong>{value}</strong>
+              <div className={styles.statName}><Icon size={21} aria-hidden="true" style={{color}}/><span>{label}</span></div>
+              <div className={styles.statTrack} role="meter" aria-label={label+' : XP cumulés'} aria-valuemin={0} aria-valuemax={maxAttribute} aria-valuenow={value} aria-valuetext={formatted+' XP'} aria-describedby="attribute-scale"><div style={{width:Math.min(100,Math.round(value/maxAttribute*100))+'%',background:color,boxShadow:'0 0 12px '+color+'44'}} /></div>
+              <strong className={styles.statValue}>{formatted} <span className={styles.statUnit}>XP</span></strong>
             </div>;
           })}</div>
-          <p className={styles.disclaimer}>Attributs ludiques, non mesures scientifiques.</p>
+          <p className={styles.disclaimer}>Les barres comparent les attributs ; elles ne représentent pas un score sur 100.</p>
         </section>
       </div>
-      {notice && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Quest reward"><div className="reward-modal"><div className="eyebrow">[ SYSTEM NOTIFICATION ]</div><h2>{notice.levelAfter > notice.levelBefore ? "LEVEL UP!" : "QUEST COMPLETE"}</h2><p>{notice.title}</p><div className="reward-xp">+{notice.xp} EXP</div><button type="button" className="continue-btn" onClick={()=>setNotice(null)}>CONTINUE</button></div></div>}
+      {notice && <Modal label="Récompense de quête" onClose={()=>setNotice(null)}><div className="reward-modal"><div className="eyebrow">[ SYSTEM NOTIFICATION ]</div><h2>{notice.levelAfter > notice.levelBefore ? "LEVEL UP!" : "QUEST COMPLETE"}</h2><p>{notice.title}</p><div className="reward-xp">+{notice.xp} EXP</div><button type="button" className="continue-btn" onClick={()=>setNotice(null)}>CONTINUE</button></div></Modal>}
     </div>}
   </SystemShell>;
 }

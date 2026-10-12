@@ -1,81 +1,69 @@
-"use client";
-import { useCallback, useEffect, useState } from "react";
-import type { Attribute } from "@/types";
-import { ensureCoreSettings, getHunterProgress, rewardMultiplier, streakDays, completionDays, applyDailyStability, getCoreSettings } from "@/lib/hunterCore";
-import { emptySystem, hasCompleted, isDue, loadState, localDate, newId, periodId, saveState, type Frequency, type QuestSystemState } from "@/lib/questSystem";
-
-export type QuestInput = {
-  title: string; description: string; frequency: Frequency; attribute: Attribute;
-  difficulty: "EASY" | "NORMAL" | "HARD"; xp: number; arcId: string; targetDate: string;
+'use client';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { loadState, localDate, SYSTEM_KEY, LEGACY_KEY, type QuestSystemState } from '@/lib/questSystem';
+import { getCoreSettings, CORE_KEY, syncAchievements } from '@/lib/hunterCore';
+import { assertBusinessStorageAccess, storageAccessRevision, subscribeStorageAccess, getStorageAccessState } from '@/lib/storageAccess';
+import { useLocalDay } from '@/lib/useLocalDay';
+import { changeQuests, createQuestAction, updateQuestAction, completeQuestAction, emptySystem, type QuestInput, type QuestReward } from '@/lib/questActions';
+export type { QuestInput, QuestReward };
+type Snapshot = {
+    data: QuestSystemState;
+    ready: boolean;
+    error: string;
 };
-export type QuestReward = { title: string; xp: number; levelBefore: number; levelAfter: number };
-export function useQuestSystem() {
-  const [data, setData] = useState<QuestSystemState>(emptySystem);
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState("");
-  const [today, setToday] = useState("");
-  useEffect(() => {
-    try { const existing=loadState(); ensureCoreSettings(existing.totalXP); applyDailyStability(); setData(existing); } catch (e) { setError(e instanceof Error ? e.message : "Impossible de charger la sauvegarde"); }
-    setToday(localDate(new Date()));
-    setReady(true);
-    const refresh = () => setToday(localDate(new Date()));
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === "lifequest-quest-system-v1") {
-        try { setData(loadState()); setError(""); } catch (e) { setError(e instanceof Error ? e.message : "Sauvegarde illisible"); }
-      }
-    };
-    const coreRefresh=()=>{try{setData(loadState());setError("")}catch(e){setError(e instanceof Error?e.message:"Sauvegarde illisible")}};
-    window.addEventListener("lifequest-core-updated",coreRefresh);
-    window.addEventListener("focus", refresh);
-    window.addEventListener("storage", onStorage);
-    return () => { window.removeEventListener("lifequest-core-updated",coreRefresh); window.removeEventListener("focus", refresh); window.removeEventListener("storage", onStorage); };
-  }, []);
-  const commit = useCallback((update: (prev: QuestSystemState) => QuestSystemState) => {
-    if (!ready || error) return false;
+const server: Snapshot = { data: emptySystem, ready: false, error: '' };
+let cached: Snapshot = server, stamp = '';
+function snapshot(): Snapshot { try {
+    assertBusinessStorageAccess();
+    const next = JSON.stringify([storageAccessRevision(),localStorage.getItem(SYSTEM_KEY), localStorage.getItem(LEGACY_KEY), localStorage.getItem(CORE_KEY)]);
+    if (next === stamp && cached.ready)
+        return cached;
+    stamp = next;
     try {
-      // Reload latest persisted state to avoid stale writes after a page navigation.
-      const previous = loadState();
-      const next = update(previous);
-      saveState(next);
-      setData(next);
-      return true;
-    } catch (e) { setError(e instanceof Error ? e.message : "Enregistrement impossible"); return false; }
-  }, [ready, error]);
-  const createQuest = (draft: QuestInput) => commit(prev => ({ ...prev, quests: [...prev.quests, {
-    id: newId(), createdAt: new Date().toISOString(), title: draft.title.trim(), description: draft.description.trim(),
-    frequency: draft.frequency, attribute: draft.attribute, difficulty: draft.difficulty, xp: draft.xp,
-    arcId: draft.arcId || undefined, targetDate: draft.frequency === "once" ? draft.targetDate || undefined : undefined,
-  }] }));
-  const updateQuest = (id: string, draft: QuestInput) => commit(prev => ({ ...prev, quests: prev.quests.map(q => q.id === id ? {
-    ...q, title: draft.title.trim(), description: draft.description.trim(), frequency: draft.frequency,
-    attribute: draft.attribute, difficulty: draft.difficulty, xp: draft.xp, arcId: draft.arcId || undefined,
-    targetDate: draft.frequency === "once" ? draft.targetDate || undefined : undefined,
-  } : q) }));
-  const archiveQuest = (id: string) => commit(prev => ({ ...prev, quests: prev.quests.map(q => q.id === id ? { ...q, archived: true } : q) }));
-  const completeQuest = (id: string): QuestReward | null => {
-    if (!ready || error) return null;
-    let reward: QuestReward | null = null;
-    const ok = commit(prev => {
-      const now = new Date();
-      const q = prev.quests.find(item => item.id === id);
-      if (!q || !isDue(q, now) || hasCompleted(q, prev.completions, now)) return prev;
-      const period = periodId(q.frequency, now);
-      const bonus=rewardMultiplier(streakDays(completionDays(prev.completions)),getCoreSettings(prev.totalXP).stability);
-      const gained=Math.round(q.xp*bonus);
-      reward = { title: q.title, xp: gained, levelBefore: getHunterProgress(prev.totalXP).level, levelAfter: getHunterProgress(prev.totalXP + gained).level };
-      return { ...prev, totalXP: prev.totalXP + reward!.xp, completions: [...prev.completions, {
-        id: newId(), questId: id, period, completedAt: now.toISOString(), xpAwarded: reward!.xp, attribute: q.attribute,
-      }] };
-    });
-    return ok ? reward : null;
-  };
-  const addArc = (title: string, description: string, targetDate: string) => {
-    const now = new Date();
-    const limit = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
-    if (!title.trim() || targetDate < localDate(now) || targetDate > localDate(limit)) return false;
-    return commit(prev => ({ ...prev, arcs: [...prev.arcs, { id: newId(), title: title.trim(), description: description.trim(), targetDate, createdAt: now.toISOString() }] }));
-  };
-  const deleteArc = (id: string) => commit(prev => ({ ...prev, arcs: prev.arcs.filter(a => a.id !== id), quests: prev.quests.map(q => q.arcId === id ? { ...q, arcId: undefined } : q) }));
-  const currentDate = today ? new Date(`${today}T12:00:00`) : new Date(2000, 0, 1);
-  return { data, ready, error, today, currentDate, createQuest, updateQuest, archiveQuest, completeQuest, addArc, deleteArc };
+        const data = loadState();
+        getCoreSettings(data.totalXP);assertBusinessStorageAccess();
+        cached = { data, ready: true, error: '' };
+    }
+    catch (e) {
+        const blocked=getStorageAccessState().status!=='ready';if(blocked)stamp='';cached = { data: emptySystem, ready: !blocked, error: e instanceof Error ? e.message : 'Sauvegarde illisible' };
+    }
+    return cached;
+}
+catch (e) {
+    stamp='';const blocked=getStorageAccessState().status!=='ready';
+    const error = String(e);
+    if (cached.error !== error)
+        cached = { data: emptySystem, ready: !blocked, error };
+    return cached;
+} }
+const subscribe=subscribeStorageAccess;
+export function useQuestSystem() {
+    const state = useSyncExternalStore(subscribe, snapshot, () => server), today = useLocalDay();
+    const [actionError, setActionError] = useState('');
+    useEffect(() => {
+        if (!state.ready || state.error) return;
+        let active = true;
+        void syncAchievements().catch(e => {
+            if (active) setActionError(e instanceof Error ? e.message : 'Enregistrement des succès impossible');
+        });
+        return () => { active = false; };
+    }, [state.ready, state.error, state.data]);
+    async function run<T>(action: () => Promise<T>, fallback: T) { if (!state.ready || state.error)
+        return fallback; try {
+        const result = await action();
+        setActionError('');
+        return result;
+    }
+    catch (e) {
+        setActionError(e instanceof Error ? e.message : 'Enregistrement impossible');
+        return fallback;
+    } }
+    return { ...state, error: state.error || actionError, today, currentDate: new Date((today || '2000-01-01') + 'T12:00:00'),
+        createQuest: (draft: QuestInput) => run(async () => { await createQuestAction(draft); return true; }, false),
+        updateQuest: (id: string, draft: QuestInput) => run(async () => { await updateQuestAction(id, draft); return true; }, false),
+        archiveQuest: (id: string) => run(async () => { await changeQuests(prev => ({ ...prev, quests: prev.quests.map(q => q.id === id ? { ...q, archived: true } : q) })); return true; }, false),
+        completeQuest: (id: string) => run(() => completeQuestAction(id), null),
+        addArc: (title: string, description: string, targetDate: string) => run(async () => { const now = new Date(), limit = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate()); if (!title.trim() || targetDate < localDate(now) || targetDate > localDate(limit))
+            throw Error('Titre ou date invalide'); await changeQuests(prev => ({ ...prev, arcs: [...prev.arcs, { id: crypto.randomUUID(), title: title.trim(), description: description.trim(), targetDate, createdAt: now.toISOString() }] })); return true; }, false),
+        deleteArc: (id: string) => run(async () => { await changeQuests(prev => ({ ...prev, arcs: prev.arcs.filter(a => a.id !== id), quests: prev.quests.map(q => q.arcId === id ? { ...q, arcId: undefined } : q) })); return true; }, false) };
 }

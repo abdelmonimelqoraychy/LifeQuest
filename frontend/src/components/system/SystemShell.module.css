@@ -1,15 +1,7 @@
-.shell{position:relative;min-height:100vh;background:#030b17;color:#eaf5ff}.layout{max-width:1580px;margin:auto;display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh;position:relative;z-index:1}.navigation{border-right:1px solid #244263;background:rgba(4,16,32,.92);padding:28px 14px;display:flex;flex-direction:column;gap:26px}.logo{display:flex;align-items:center;gap:12px;padding:7px 14px;color:#70ccff;letter-spacing:2px;font-size:15px;font-weight:850}.links{display:flex;flex-direction:column;gap:8px}.link{color:#91acc7;display:flex;gap:13px;align-items:center;text-decoration:none;border:1px solid transparent;padding:15px 13px;border-radius:10px;font-size:12px;font-weight:750;letter-spacing:.7px;transition:background .15s}.link:hover{background:#12283f;color:white}.active{background:linear-gradient(90deg,#103b65,#0c1c35);border-color:#3777a4;color:#d3efff}.online{margin-top:auto;font-size:11px;color:#6ad8c8;display:flex;align-items:center;gap:8px;padding:12px}.content{min-width:0;padding:30px clamp(16px,3vw,48px) 55px}.header{padding:14px 0 24px;border-bottom:1px solid #26415d;margin-bottom:20px}.kicker{color:#62bafb;letter-spacing:2px;font-size:11px}.header h1{font-size:clamp(27px,4vw,44px);letter-spacing:2px;color:white;margin:9px 0}.header p{color:#aac0d9;font-size:14px;margin:0}@media(max-width:830px){.layout{display:block}.navigation{border-right:0;border-bottom:1px solid #244263;padding:12px;gap:10px}.logo{padding:8px}.links{flex-direction:row;flex-wrap:wrap;gap:7px}.link{padding:11px;font-size:10px}.online{display:none}.content{padding:18px 13px 40px}}
+.shell{position:relative;background:#030b17;color:#eaf5ff;height:100dvh;min-height:0;overflow:hidden;isolation:isolate;overflow-x:clip}.layout{margin:auto;display:grid;position:relative;z-index:1;height:100%;min-height:0;max-width:none;grid-template-columns:220px minmax(0,1fr);transition:grid-template-columns .22s ease}.navigation{border-right:1px solid #244263;background:rgba(4,16,32,.92);display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:19px 12px;gap:19px}.logo{display:flex;align-items:center;color:#70ccff;letter-spacing:2px;font-weight:850;padding:5px;gap:9px;font-size:12px;white-space:nowrap}.links{display:flex;flex-direction:column;gap:8px}.link{color:#91acc7;display:flex;gap:13px;align-items:center;text-decoration:none;border:1px solid transparent;padding:15px 13px;border-radius:10px;font-size:12px;font-weight:750;letter-spacing:.7px;transition:background .15s}.link:hover{background:#12283f;color:white}.active{background:linear-gradient(90deg,#103b65,#0c1c35);border-color:#3777a4;color:#d3efff}.online{margin-top:auto;font-size:11px;color:#6ad8c8;display:flex;align-items:center;gap:8px;padding:12px}.content{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:17px clamp(16px,2.3vw,36px) 24px; position: relative;overflow-wrap:anywhere}.header{border-bottom:1px solid #26415d;padding:5px 0 15px;margin-bottom:14px}.kicker{color:#62bafb;letter-spacing:2px;font-size:11px}.header h1{letter-spacing:2px;color:white;font-size:clamp(26px,2.5vw,36px);margin:7px 0}.header p{color:#aac0d9;margin:0;font-size:12px}@media(max-width:830px){.layout{display:block}.navigation{border-right:0;border-bottom:1px solid #244263;padding:12px;gap:10px}.logo{padding:8px}.links{flex-direction:row;flex-wrap:wrap;gap:7px}.link{padding:11px;font-size:10px}.online{display:none}.content{padding:18px 13px 40px}}
 
 /* Mission 008-A.5: collapsible navigation + fixed viewport without page-wide horizontal scrolling */
-.shell{height:100dvh;min-height:0;overflow:hidden}
-.layout{height:100%;min-height:0;max-width:none;grid-template-columns:220px minmax(0,1fr);transition:grid-template-columns .22s ease}
-.navigation{min-height:0;overflow:hidden;padding:19px 12px;gap:19px}
-.content{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:17px clamp(16px,2.3vw,36px) 24px}
-.header{padding:5px 0 15px;margin-bottom:14px}
-.header h1{font-size:clamp(26px,2.5vw,36px);margin:7px 0}
-.header p{font-size:12px}
-.logo{padding:5px;gap:9px;font-size:12px;white-space:nowrap}
-.collapseButton{margin-left:auto;flex:none;border:1px solid #35678b;background:#10314e;color:#a3ddff;border-radius:7px;width:33px;height:33px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.collapseButton{margin-left:auto;flex:none;border:1px solid #35678b;background:#10314e;color:#a3ddff;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;width:44px;height:44px}
 .collapseButton:hover{background:#195076;color:white}
 .link{padding:12px 10px;font-size:11px;white-space:nowrap}
 .collapsed{grid-template-columns:66px minmax(0,1fr)}
@@ -20,7 +12,7 @@
 .collapsed .links .link{justify-content:center;padding:11px 8px}
 .mobileToggle{display:none}
 @media(max-width:830px){
-.shell{height:auto;min-height:100dvh;overflow:visible}
+.shell{height:auto;min-height:100dvh;overflow:visible;overflow-x:clip}
 .layout,.collapsed{display:block;height:auto;min-height:100dvh}
 .navigation,.collapsed .navigation{overflow:visible;padding:9px 12px;gap:6px}
 .navigation .logo,.collapsed .logo{justify-content:flex-start;flex-wrap:nowrap}
@@ -34,5 +26,4 @@
 }
 
 /* LIFEQUEST 008C7 : ancre Rank dans le panneau de contenu. */
-.content { position: relative; }
 @media(min-width:651px) { .header:has(+ [class*="rankWindow"]) { padding-right: 125px; min-height: 120px; } }

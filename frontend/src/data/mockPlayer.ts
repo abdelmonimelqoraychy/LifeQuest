@@ -16,4 +16,4 @@ export const initialGame: GameState = {
   ],
 };
 export const XP_PER_LEVEL = 300;
-export function getLevel(totalXP: number) { return Math.floor(totalXP / XP_PER_LEVEL) + 1; }
+export { initialLevel as getLevel } from "@/lib/hunterCore";

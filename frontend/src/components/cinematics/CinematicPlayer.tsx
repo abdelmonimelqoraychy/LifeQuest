@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Modal from '@/components/ui/Modal';
 import styles from "./CinematicPlayer.module.css";
 
 type Props = {
   src: string;
+  fallbackSrc?: string;
   title: string;
   subtitle: string;
   onComplete: () => void;
   fullscreen?: boolean;
 };
 
-export default function CinematicPlayer({ src, title, subtitle, onComplete, fullscreen = false }: Props) {
+export default function CinematicPlayer({ src, fallbackSrc, title, subtitle, onComplete, fullscreen = false }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const doneRef = useRef(false);
   const [muted, setMuted] = useState(true);
   const [paused, setPaused] = useState(false);
   const [error, setError] = useState(false);
+  const [usingFallback,setUsingFallback]=useState(false);
   const [progress, setProgress] = useState(0);
 
   const finish = () => {
@@ -31,7 +34,7 @@ export default function CinematicPlayer({ src, title, subtitle, onComplete, full
     if (!video) return;
     const attempt = video.play();
     if (attempt) void attempt.then(() => setPaused(false)).catch(() => setPaused(true));
-  }, [src]);
+  }, [src,usingFallback]);
 
   const togglePlayback = () => {
     const video = videoRef.current;
@@ -44,18 +47,18 @@ export default function CinematicPlayer({ src, title, subtitle, onComplete, full
     }
   };
 
-  return (
+  const content = (
     <section className={`${styles.cinema} ${fullscreen ? styles.fullscreen : ""}`} aria-label={title}>
       <div className={styles.backdrop} />
       {!error && <video
         ref={videoRef}
         className={styles.video}
-        src={src}
+        src={usingFallback&&fallbackSrc?fallbackSrc:src}
         playsInline
         autoPlay
         muted={muted}
-        preload="auto"
-        onError={() => setError(true)}
+        preload="metadata"
+        onError={() => {if(fallbackSrc&&!usingFallback)setUsingFallback(true);else setError(true);}}
         onEnded={finish}
         onPause={() => setPaused(true)}
         onPlay={() => setPaused(false)}
@@ -83,4 +86,5 @@ export default function CinematicPlayer({ src, title, subtitle, onComplete, full
       </div>
     </section>
   );
+  return fullscreen ? <Modal label={title} onClose={finish}>{content}</Modal> : content;
 }
