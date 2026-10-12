@@ -25,6 +25,56 @@ const q=load('questSystem'),core=load('hunterCore');
 const today=()=>new Date().toISOString();
 const event=(id,period='2026-10-10')=>({id,questId:'quest-1',period,completedAt:today(),xpAwarded:30,attribute:'focus'});
 const state=()=>({version:1,totalXP:450,quests:[],arcs:[],completions:[]});
+function restoreFixture(frequency='daily',completed=true){
+ const quest={id:'restore-quest',title:'Restore me',description:'Keep draft fields',frequency,difficulty:'HARD',attribute:'discipline',xp:77,createdAt:'2025-01-01T12:00:00.000Z',targetDate:frequency==='once'?'2025-01-02':undefined,revision:4};
+ const receipt={id:'restore-receipt',questId:quest.id,period:q.periodId(frequency),completedAt:today(),xpAwarded:77,attribute:'discipline',questTitle:'Old title',arcId:null};
+ const initial={...state(),quests:[quest],completions:completed?[receipt]:[],achievements:[{id:'first-clear',unlockedAt:today()}]};
+ storage.setItem(q.SYSTEM_KEY,JSON.stringify(initial));return initial;
+}
+test('Restore preserves identity, custom XP, receipts and all quest fields through reload and v1/v2 imports',async()=>{
+ const actions=load('questActions'),initial=restoreFixture('once');
+ await actions.archiveQuestAction('restore-quest');
+ const archived=q.loadState();assert.equal(archived.quests[0].revision,5);
+ const backup=core.exportLifeQuest();await core.importLifeQuest(backup);
+ await actions.restoreQuestAction('restore-quest');
+ const expected={...initial,quests:[{...initial.quests[0],archived:false,revision:6}]};
+ assert.equal(JSON.stringify(q.loadState()),JSON.stringify(expected));
+ for(const version of [1,2]){await core.importLifeQuest({...backup,version});await actions.restoreQuestAction('restore-quest');assert.equal(JSON.stringify(q.loadState()),JSON.stringify(expected));}
+ assert.equal(await actions.completeQuestAction('restore-quest'),null);
+});
+for(const frequency of ['daily','weekly','monthly'])test(`Restore ${frequency} completed quest does not reward it again in current period`,async()=>{
+ const actions=load('questActions'),initial=restoreFixture(frequency);
+ await actions.archiveQuestAction('restore-quest');await actions.restoreQuestAction('restore-quest');
+ assert.equal(await actions.completeQuestAction('restore-quest'),null);
+ assert.equal(q.loadState().totalXP,initial.totalXP);assert.equal(JSON.stringify(q.loadState().completions),JSON.stringify(initial.completions));
+ const next=new Date();next.setMonth(next.getMonth()+2);assert.equal(q.hasCompleted(q.loadState().quests[0],initial.completions,next),false);
+});
+test('Concurrent restoration is idempotent and an eligible quest still receives exactly one reward',async()=>{
+ const actions=load('questActions');restoreFixture('daily',false);await actions.archiveQuestAction('restore-quest');
+ await Promise.all([actions.restoreQuestAction('restore-quest'),actions.restoreQuestAction('restore-quest')]);
+ assert.equal(q.loadState().quests.length,1);assert.equal(q.loadState().quests[0].revision,6);assert.equal(q.loadState().totalXP,450);
+ const rewards=await Promise.all([actions.completeQuestAction('restore-quest'),actions.completeQuestAction('restore-quest')]);
+ assert.equal(rewards.filter(Boolean).length,1);assert.equal(q.loadState().totalXP,527);assert.equal(q.loadState().completions.length,1);
+ const raw=storage.getItem(q.SYSTEM_KEY);await actions.restoreQuestAction('restore-quest');assert.equal(storage.getItem(q.SYSTEM_KEY),raw);
+});
+test('Archive/restore invalidates stale edits, preserves cooldown and does not overwrite a newer edit',async()=>{
+ const actions=load('questActions'),initial=restoreFixture();initial.quests[0].availableAfter='2099-01-01';storage.setItem(q.SYSTEM_KEY,JSON.stringify(initial));
+ await actions.archiveQuestAction('restore-quest');await actions.restoreQuestAction('restore-quest');
+ const draft={...initial.quests[0],arcId:'',targetDate:'',expectedRevision:4};
+ await assert.rejects(actions.updateQuestAction('restore-quest',draft),/autre onglet/);
+ assert.equal(q.loadState().quests[0].availableAfter,'2099-01-01');
+ await actions.updateQuestAction('restore-quest',{...draft,title:'New edit',expectedRevision:6});await actions.restoreQuestAction('restore-quest');assert.equal(q.loadState().quests[0].title,'New edit');
+});
+test('Restore refuses missing quests and failed storage, permits retry without losing history',async()=>{
+ const actions=load('questActions');restoreFixture();await actions.archiveQuestAction('restore-quest');const raw=storage.getItem(q.SYSTEM_KEY);
+ await assert.rejects(actions.restoreQuestAction('missing'),/introuvable/);assert.equal(storage.getItem(q.SYSTEM_KEY),raw);
+ storage.failKey=q.SYSTEM_KEY;await assert.rejects(actions.restoreQuestAction('restore-quest'),/Quota/);assert.equal(storage.getItem(q.SYSTEM_KEY),raw);
+ await actions.restoreQuestAction('restore-quest');assert.equal(q.loadState().quests[0].archived,false);assert.equal(q.loadState().totalXP,450);
+});
+test('F05 blocks even repeated restore and archive without modifying any stored record',async()=>{
+ const actions=load('questActions');restoreFixture();await actions.archiveQuestAction('restore-quest');storage.setItem('lifequest-import-journal-v1','{broken');const before=JSON.stringify([...values]);
+ await assert.rejects(actions.restoreQuestAction('restore-quest'),/journal/);await assert.rejects(actions.archiveQuestAction('restore-quest'),/journal/);assert.equal(JSON.stringify([...values]),before);
+});
 test.beforeEach(()=>{values.clear();storage.failKey=null;});
 test('Levels recalculated from all existing XP without changing the saved total',()=>{
  const c={version:1,baselineXP:300,baselineLevel:2,stability:100,lastPenaltyDay:'',penaltyDays:[],initializedAt:today()};

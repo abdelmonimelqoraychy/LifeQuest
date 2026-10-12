@@ -38,6 +38,20 @@ else if (f === 'monthly')
 else
     d.setDate(d.getDate() + 1); return localDate(d); }
 export function createQuestAction(draft: QuestInput) { return changeQuests(prev => ({ ...prev, quests: [...prev.quests, { ...draftQuest(draft, prev), id: newId(), createdAt: new Date().toISOString() }] })); }
+function setQuestArchived(id: string, archived: boolean) {
+    return withStorageLock(() => {
+        const prev = loadState(), quest = prev.quests.find(q => q.id === id);
+        if (!quest) throw Error('Quête introuvable.');
+        if (!!quest.archived === archived) return prev;
+        const next = { ...prev, quests: prev.quests.map(q => q.id === id
+            ? { ...q, archived, revision: (q.revision ?? 0) + 1 } : q) };
+        saveState(next);
+        notifyStorage();
+        return next;
+    });
+}
+export const archiveQuestAction = (id: string) => setQuestArchived(id, true);
+export const restoreQuestAction = (id: string) => setQuestArchived(id, false);
 export function updateQuestAction(id: string, draft: QuestInput) {
     return changeQuests(prev => {
         const old = prev.quests.find(q => q.id === id && !q.archived);

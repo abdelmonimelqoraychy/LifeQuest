@@ -49,6 +49,8 @@ Les composants historiques restent disponibles. Les dossiers de sauvegarde ne so
 
 ## Règles RPG
 
+Dans Quest Log, l'onglet **Quêtes archivées** rassemble toutes les fréquences. **Restaurer** remet la quête dans sa liste active avec le même identifiant, ses champs et ses validations. Aucun XP n'est attribué par cette action ; une validation déjà reçue pendant la période courante reste bloquée, y compris pour une quête spéciale terminée. Les limites de disponibilité restent inchangées. Les changements archive/restauration incrémentent la révision pour refuser une édition devenue périmée ; les restaurations répétées sont sans effet supplémentaire. Les archives sont incluses dans les backups v1/v2 et les actions restent bloquées pendant une récupération F05.
+
 Tous les niveaux sont recalculés depuis les EXP totaux, selon le choix de l’utilisateur : coût du niveau n = 200 + 25 × (n − 1). Niveau maximal : 100. Les EXP gagnés et les anciennes validations ne sont jamais diminués par ce recalcul. Les anciens niveaux peuvent donc changer.
 
 Quêtes : EASY 30, NORMAL 50, HARD 80 EXP. Un crédit par jour local, semaine commençant lundi, mois civil ou quête spéciale. Un changement de fréquence prend effet après les périodes en cours ; une quête spéciale déjà terminée ne devient pas récurrente. Les nouvelles validations conservent le titre et l’arc de leur réalisation ; les anciennes affichent les informations encore disponibles.
