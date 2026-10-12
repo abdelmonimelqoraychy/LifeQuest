@@ -1,9 +1,15 @@
-"use client";
-import { useState, type ReactNode } from "react";
+'use client';
+import { getStorageAccessState } from '@/lib/storageAccess';
+import { assertBusinessStorageAccess } from '@/lib/storageAccess';
+
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, Compass, Menu, PanelLeftClose, PanelLeftOpen, PlusCircle, ScrollText, Shield, Zap } from "lucide-react";
 import styles from "./SystemShell.module.css";
+import {readProfile,PROFILE_KEY} from '@/lib/profile';
+import {useStoredData} from '@/lib/useStoredData';
+function existingAccount(){assertBusinessStorageAccess();return localStorage.getItem('lifequest-quest-system-v1')!==null||localStorage.getItem('lifequest-v2-demo')!==null;}
 const routes = [
   { href: "/dashboard", name: "STATUS WINDOW", icon: Compass },
   { href: "/quests", name: "QUEST LOG", icon: ScrollText },
@@ -12,8 +18,12 @@ const routes = [
   { href: "/hunter-lab", name: "HUNTER LAB", icon: Zap },
 ];
 export default function SystemShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePathname(),router=useRouter();
+  const profile=useStoredData(PROFILE_KEY,readProfile,null),existing=useStoredData("lifequest-quest-system-v1",existingAccount,false);
+  const needsOnboarding=profile.ready&&existing.ready&&!profile.error&&!existing.error&&!profile.data&&!existing.data&&pathname!=="/hunter-core";
+  useEffect(()=>{if(needsOnboarding&&getStorageAccessState().status==='ready')router.replace("/onboarding");},[needsOnboarding,router]);
   const [collapsed, setCollapsed] = useState(false);
+  if((!profile.ready||!existing.ready||needsOnboarding)&&pathname!=="/hunter-core")return <main>Chargement du profil…</main>;
   return <main className={styles.shell}>
     <div className="ambient-orb ambient-one" aria-hidden="true"/><div className="ambient-orb ambient-two" aria-hidden="true"/><div className="sky-stars" aria-hidden="true"/>
     <div className={`${styles.layout} ${collapsed ? styles.collapsed : ""}`}>
@@ -25,6 +35,7 @@ export default function SystemShell({ title, subtitle, children }: { title: stri
       <div className={styles.content}>
         <button type="button" className={styles.mobileToggle} onClick={() => setCollapsed(v => !v)} aria-label={collapsed ? "Afficher le menu" : "Masquer le menu"}><Menu size={18}/> {collapsed ? "MENU" : "MASQUER MENU"}</button>
         <header className={styles.header}><span className={styles.kicker}>[ LIFEQUEST // SYSTEM INTERFACE ]</span><h1>{title}</h1><p>{subtitle}</p></header>
+        {profile.error&&<p role="alert">{profile.error} <Link href="/hunter-core">Exporter les données</Link></p>}
         {children}
       </div>
     </div>

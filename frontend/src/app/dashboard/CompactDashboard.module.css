@@ -48,3 +48,24 @@
 @media(max-width:1220px) { .heroPanel { grid-template-columns: 1fr; } .lowerGrid { gap: 12px; } }
 @media(max-width:800px) { .lowerGrid { grid-template-columns: 1fr; } .questPanel, .attributePanel { height: 380px; max-height: 380px; } }
 @media(max-width:500px) { .heroPanel { padding: 10px; } .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .questPanel, .attributePanel { padding: 14px; height: 370px; max-height: 370px; } }
+
+/* Grow with text zoom while retaining the compact default composition. */
+.questPanel,.attributePanel{height:auto;max-height:none;min-height:390px;overflow:visible}
+.questScroll{max-height:320px;min-height:0}.questTitle{white-space:normal;overflow-wrap:anywhere}
+.statRow{grid-template-columns:minmax(100px,154px) minmax(20px,1fr) minmax(35px,max-content)}
+@media(max-width:500px){.questPanel,.attributePanel{min-height:370px}.statRow{grid-template-columns:100px minmax(20px,1fr) minmax(35px,max-content)}}
+
+/* Attribute XP: explicit shared scale and readable values on small screens. */
+.attributeSummary{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.attributeSummary p{margin:0;color:#b4d7eb;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.attributeSummary .attributeScale{color:#79dcff;font-variant-numeric:tabular-nums}
+.attributePanel .statRow{grid-template-columns:minmax(100px,145px) minmax(40px,1fr) minmax(70px,max-content)}
+.statValue{min-width:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.statUnit{font-size:12px;color:#b4d7eb;font-weight:500}
+.attributePanel .disclaimer{font-size:12px;line-height:1.5;color:#a0c3db;margin-top:12px}
+@media(max-width:600px){
+ .attributePanel .statRow{grid-template-columns:minmax(0,1fr) minmax(70px,max-content);row-gap:10px;padding:12px 0}
+ .attributePanel .statName{grid-column:1;grid-row:1;font-size:13px}
+ .attributePanel .statValue{grid-column:2;grid-row:1}
+ .attributePanel .statTrack{grid-column:1/-1;grid-row:2;height:9px}
+}

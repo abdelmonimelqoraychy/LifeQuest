@@ -1,6 +1,8 @@
 "use client";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import {readProfile,PROFILE_KEY} from '@/lib/profile';
+import {useStoredData} from '@/lib/useStoredData';
+import {rankForLevel} from '@/lib/hunterMissions';
 import { UserRound } from "lucide-react";
 import Image from "next/image";
 import SystemCard from "@/components/ui/SystemCard";
@@ -8,8 +10,7 @@ import XPBar from "@/components/player/XPBar";
 import { getLevel, player } from "@/data/mockPlayer";
 export default function HeroCard({ totalXP }: { totalXP: number }) {
   const level = getLevel(totalXP);
-  const [profile, setProfile] = useState<{name?:string;avatar?:"male"|"female"}|null>(null);
-  useEffect(()=>{try{const raw=localStorage.getItem("lifequest-profile-v1");if(raw)setProfile(JSON.parse(raw));}catch{/* keep default */}},[]);
+  const {data:profile}=useStoredData(PROFILE_KEY,readProfile,null);
   const female = profile?.avatar === "female";
   return <SystemCard label="PLAYER STATUS" className="hero-card">
     <div className={`hero-portrait ${female ? "hero-portrait-female" : ""}`} aria-label="Portrait du héros LifeQuest">
@@ -26,7 +27,7 @@ export default function HeroCard({ totalXP }: { totalXP: number }) {
       <div className="eyebrow">PLAYER ID // 001 <span className="online-dot"/></div>
       <motion.h2 key={level} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}}>{profile?.name || player.name}</motion.h2>
       <p className="hero-subtitle">{female ? "ASTRAL HUNTER" : player.title}</p>
-      <div className="hero-badges"><span className="rank-badge">RANK E</span><span className="level-badge">LVL {String(level).padStart(2,"0")}</span></div>
+      <div className="hero-badges"><span className="rank-badge">RANK {rankForLevel(level)}</span><span className="level-badge">LVL {String(level).padStart(2,"0")}</span></div>
       <XPBar totalXP={totalXP}/>
       <p className="hero-motto">“EVOLVE THROUGH ACTION.”</p>
     </div>

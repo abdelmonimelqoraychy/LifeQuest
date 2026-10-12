@@ -1,40 +1,54 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import {QUEST_REWARDS} from "@/lib/hunterCore";
 import type { Attribute } from "@/types";
 import type { Frequency } from "@/lib/questSystem";
 import { useQuestSystem, type QuestInput } from "@/lib/useQuestSystem";
 import SystemShell from "@/components/system/SystemShell";
 import ui from "@/components/system/QuestUI.module.css";
 const initial:QuestInput={title:"",description:"",frequency:"daily",attribute:"discipline",difficulty:"NORMAL",xp:50,arcId:"",targetDate:""};
-const reward={EASY:30,NORMAL:50,HARD:80};
+const reward=QUEST_REWARDS;
 const freqs:{value:Frequency;label:string}[]=[{value:"daily",label:"DAILY QUEST"},{value:"weekly",label:"WEEKLY QUEST"},{value:"monthly",label:"MONTHLY QUEST"},{value:"once",label:"SPECIAL QUEST"}];
 function QuestEditor(){
   const system=useQuestSystem(); const router=useRouter(); const search=useSearchParams();
   const editId=search.get("edit");
-  const [draft,setDraft]=useState<QuestInput>(initial);
-  const [formError,setFormError]=useState("");
-  useEffect(()=>{
-    if(!system.ready)return;
-    const quest=editId?system.data.quests.find(q=>q.id===editId&&!q.archived):undefined;
-    if(quest)setDraft({title:quest.title,description:quest.description,frequency:quest.frequency,attribute:quest.attribute,difficulty:quest.difficulty,xp:quest.xp,arcId:quest.arcId||"",targetDate:quest.targetDate||""});
-  // Only initialize when data loads or editing target changes; do not reset form while typing.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[system.ready,editId]);
+  const [edited,setEdited]=useState<QuestInput|null>(null);
+  const [formError,setFormError]=useState('');
+  const submitting=useRef(false);
+  const [saving,setSaving]=useState(false);
+  const quest=editId?system.data.quests.find(q=>q.id===editId&&!q.archived):undefined;
+  const draft=edited??(quest?{title:quest.title,description:quest.description,frequency:quest.frequency,attribute:quest.attribute,difficulty:quest.difficulty,xp:quest.xp,expectedRevision:quest.revision??0,arcId:quest.arcId||'',targetDate:quest.targetDate||''}:initial);
+  const setDraft=(update:(old:QuestInput)=>QuestInput)=>setEdited(update(draft));
   const missing=Boolean(editId&&!system.data.quests.some(q=>q.id===editId&&!q.archived));
-  function submit(e:React.FormEvent<HTMLFormElement>){
+  async function submit(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault();
+    // React state updates are deferred; this ref blocks a second synchronous submit.
+    if(submitting.current)return;
     if(!draft.title.trim()){setFormError("Quest title is required");return;}
     if(missing){setFormError("Quest unavailable");return;}
-    const ok=editId?system.updateQuest(editId,draft):system.createQuest(draft);
-    if(ok)router.push("/quests");else setFormError("Unable to save quest");
+    submitting.current=true;
+    setSaving(true);
+    setFormError('');
+    setEdited(draft);
+    let navigating=false;
+    try{
+      const ok=editId?await system.updateQuest(editId,draft):await system.createQuest(draft);
+      if(ok){router.push("/quests");navigating=true;}
+      else setFormError("Unable to save quest");
+    }catch(e){
+      setFormError(e instanceof Error?e.message:"Unable to save quest");
+    }finally{
+      // On success keep the lock until unmount, including the navigation interval.
+      if(!navigating){submitting.current=false;setSaving(false);}
+    }
   }
   return <SystemShell title={editId?"EDIT QUEST":"CREATE QUEST"} subtitle="THE SYSTEM ACCEPTS A NEW MISSION">
     {system.error&&<div role="alert" className={ui.danger}>{system.error}</div>}
     {!system.ready?<p className={ui.notice}>SYSTEM LOADING...</p>:missing?<div className={ui.formCard}><h2>QUEST NOT FOUND</h2><Link className={ui.link} href="/quests">RETURN TO QUEST LOG</Link></div>:<div className={ui.formCard}>
       <h2>{editId?"MODIFY QUEST":"REGISTER NEW QUEST"}</h2><p>Les récompenses sont liées à la difficulté. Chaque période ne peut être validée qu&apos;une fois.</p>
-      <form className={ui.form} onSubmit={submit}>
+      <form className={ui.form} onSubmit={submit} aria-busy={saving}>
         <label>QUEST NAME<input required maxLength={100} value={draft.title} onChange={e=>setDraft(p=>({...p,title:e.target.value}))} placeholder="Ex: Étudier Python 45 minutes"/></label>
         <label>DESCRIPTION<input maxLength={250} value={draft.description} onChange={e=>setDraft(p=>({...p,description:e.target.value}))}/></label>
         <div className={ui.two}>
@@ -48,9 +62,10 @@ function QuestEditor(){
         <label>STORY ARC<select value={draft.arcId} onChange={e=>setDraft(p=>({...p,arcId:e.target.value}))}><option value="">NO ARC</option>{system.data.arcs.map(a=><option key={a.id} value={a.id}>{a.title}</option>)}</select></label>
         {draft.frequency==="once"&&<label>AVAILABLE FROM<input type="date" value={draft.targetDate} onChange={e=>setDraft(p=>({...p,targetDate:e.target.value}))}/></label>}
         {formError&&<p role="alert" className={ui.danger}>{formError}</p>}
-        <div className={ui.dialogActions}><Link className={ui.link} href="/quests">CANCEL</Link><button className={ui.primary} type="submit">{editId?"SAVE QUEST":"CREATE QUEST"}</button></div>
+        <div className={ui.dialogActions}><Link className={ui.link} href="/quests">CANCEL</Link><button className={ui.primary} type="submit" disabled={saving}>{saving?"ENREGISTREMENT…":editId?"SAVE QUEST":"CREATE QUEST"}</button></div>
       </form><div className={ui.tip}>Pour créer un objectif à long terme, ouvre STORY ARCS puis associe tes quêtes à cet ARC.</div>
     </div>}
   </SystemShell>;
 }
-export default function CreateQuestPage(){return <Suspense fallback={<div>LOADING SYSTEM...</div>}><QuestEditor/></Suspense>;}
+function QuestEditorEntry(){const search=useSearchParams();return <QuestEditor key={search.get("edit")||"new"}/>;}
+export default function CreateQuestPage(){return <Suspense fallback={<div>LOADING SYSTEM...</div>}><QuestEditorEntry/></Suspense>;}

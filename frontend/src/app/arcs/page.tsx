@@ -9,7 +9,7 @@ export default function StoryArcsPage(){
   const system=useQuestSystem();
   const [title,setTitle]=useState("");const [description,setDescription]=useState("");const [date,setDate]=useState("");const [message,setMessage]=useState("");
   const max=system.today?(()=>{const parts=system.today.split("-").map(Number);const d=new Date(parts[0]+2,parts[1]-1,parts[2]);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;})():undefined;
-  const onSubmit=(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();const ok=system.addArc(title,description,date);if(ok){setTitle("");setDescription("");setDate("");setMessage("STORY ARC REGISTERED");}else setMessage("Check title and target date (maximum 2 years).");};
+  const onSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();const ok=await system.addArc(title,description,date);if(ok){setTitle("");setDescription("");setDate("");setMessage("STORY ARC REGISTERED");}else setMessage("Check title and target date (maximum 2 years).");};
   return <SystemShell title="STORY ARCS" subtitle="YOUR LONG-TERM PATH IS WRITTEN HERE">
     {system.error&&<div role="alert" className={ui.danger}>{system.error}</div>}
     {!system.ready?<p className={ui.notice}>SYSTEM LOADING...</p>:<>

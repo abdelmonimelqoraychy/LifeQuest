@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { BookOpen, CheckCircle2, Plus, Pencil, Archive, Target, Trash2, CalendarDays } from "lucide-react";
+import {QUEST_REWARDS} from "@/lib/hunterCore";
 import type { Attribute } from "@/types";
 import type { Frequency, QuestSystemState, SystemQuest, StoryArc } from "@/lib/questSystem";
 import { hasCompleted, isDue, localDate } from "@/lib/questSystem";
@@ -12,7 +13,7 @@ const frequencies: { id: Frequency; label: string }[] = [
 ];
 export type QuestDraft = { title: string; description: string; frequency: Frequency; attribute: Attribute; difficulty: "EASY"|"NORMAL"|"HARD"; xp: number; arcId: string; targetDate: string };
 const blank: QuestDraft = { title: "", description: "", frequency: "daily", attribute: "discipline", difficulty: "NORMAL", xp: 50, arcId: "", targetDate: "" };
-const rewards = { EASY: 30, NORMAL: 50, HARD: 80 } as const;
+const rewards = QUEST_REWARDS;
 export default function QuestCommandCenter({ data, onCreate, onUpdate, onArchive, onComplete, onCreateArc, onDeleteArc }: {
   data: QuestSystemState;
   onCreate: (draft: QuestDraft) => void;
