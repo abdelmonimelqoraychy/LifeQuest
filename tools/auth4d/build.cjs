@@ -1,0 +1,12 @@
+'use strict';
+const {spawnSync}=require('node:child_process');
+const path=require('node:path');
+const {project,status}=require('../auth4c/stack.cjs');
+if(project!=='lifequest-auth4d-reader-20261013')throw Error('READER_STACK_REQUIRED');
+const cfg=status();
+const frontend=path.resolve(__dirname,'../../frontend');
+const env={...process.env,NEXT_PUBLIC_SUPABASE_URL:cfg.API_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:cfg.PUBLISHABLE_KEY,APP_ORIGIN:'http://127.0.0.1:3104'};
+const result=spawnSync(process.execPath,[path.join(frontend,'node_modules/next/dist/bin/next'),'build'],{cwd:frontend,env,stdio:'inherit'});
+if(result.error)throw new Error('NEXT_BUILD_UNAVAILABLE');
+if(result.status!==0)process.exitCode=result.status||1;
+else console.log('PASS production build configured for the isolated local reader stack; no credential values emitted');

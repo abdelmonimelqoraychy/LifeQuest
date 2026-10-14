@@ -14,16 +14,20 @@ const frequencies: { id: Frequency; label: string }[] = [
 export type QuestDraft = { title: string; description: string; frequency: Frequency; attribute: Attribute; difficulty: "EASY"|"NORMAL"|"HARD"; xp: number; arcId: string; targetDate: string };
 const blank: QuestDraft = { title: "", description: "", frequency: "daily", attribute: "discipline", difficulty: "NORMAL", xp: 50, arcId: "", targetDate: "" };
 const rewards = QUEST_REWARDS;
-export default function QuestCommandCenter({ data, onCreate, onUpdate, onArchive, onComplete, onCreateArc, onDeleteArc }: {
+export default function QuestCommandCenter({ data, onCreate, onUpdate, onArchive, onRestore, onComplete, onCreateArc, onDeleteArc, serverAuthoritative = false }: {
   data: QuestSystemState;
   onCreate: (draft: QuestDraft) => void;
   onUpdate: (id: string, draft: QuestDraft) => void;
   onArchive: (id: string) => void;
+  onRestore?: (id: string) => void;
   onComplete: (id: string) => void;
   onCreateArc: (title: string, description: string, date: string) => void;
   onDeleteArc: (id: string) => void;
+  /** Let PostgreSQL decide due/completed status; client calendar is display-only. */
+  serverAuthoritative?: boolean;
 }) {
   const [tab, setTab] = useState<Frequency>("daily");
+  const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<QuestDraft>(blank);
   const [showEditor, setShowEditor] = useState(false);
@@ -44,8 +48,8 @@ export default function QuestCommandCenter({ data, onCreate, onUpdate, onArchive
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
-  const visible = data.quests.filter(q => q.frequency === tab && !q.archived);
-  const done = today ? visible.filter(q => hasCompleted(q, data.completions, today)).length : 0;
+  const visible = data.quests.filter(q => showArchived ? q.archived : q.frequency === tab && !q.archived);
+  const done = !serverAuthoritative && today ? visible.filter(q => hasCompleted(q, data.completions, today)).length : 0;
   const openCreate = () => { setDraft({ ...blank, frequency: tab }); setEditing(null); setShowEditor(true); };
   const openEdit = (q: SystemQuest) => { setDraft({ title: q.title, description: q.description, frequency: q.frequency, attribute: q.attribute, difficulty: q.difficulty, xp: q.xp, arcId: q.arcId || "", targetDate: q.targetDate || "" }); setEditing(q.id); setShowEditor(true); };
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,15 +58,15 @@ export default function QuestCommandCenter({ data, onCreate, onUpdate, onArchive
     setShowEditor(false);
   };
   return <section className={styles.panel} id="quest-log" aria-label="Quest Log">
-    <div className={styles.header}><div><span className={styles.kicker}>[ SYSTEM // QUEST MANAGEMENT ]</span><h2>QUEST LOG</h2><p>Crée tes propres missions. Chaque période donne une seule récompense.</p></div><button type="button" className={styles.primary} onClick={openCreate}><Plus size={16}/> CREATE QUEST</button></div>
-    <div className={styles.tabs} role="group" aria-label="Fréquence des missions">{frequencies.map(f=><button key={f.id} type="button" className={tab===f.id?styles.selected:""} onClick={()=>setTab(f.id)}>{f.label}</button>)}</div>
-    <div className={styles.summary}><span>{done} / {visible.length} CLEARED</span><span>{tab === "once" ? "ONE TIME" : tab.toUpperCase() + " RESET"}</span></div>
+    <div className={styles.header}><div><span className={styles.kicker}>[ SYSTEM // QUEST DIRECTORY ]</span><h2>ACTIVE QUESTS</h2><p>Gère et complète tes missions selon leur fréquence.</p></div><button type="button" className={styles.primary} onClick={openCreate}><Plus size={16}/> CREATE QUEST</button></div>
+    <div className={styles.tabs} role="group" aria-label="Fréquence des missions">{frequencies.map(f=><button key={f.id} type="button" className={!showArchived&&tab===f.id?styles.selected:""} onClick={()=>{setShowArchived(false);setTab(f.id);}}>{f.label}</button>)}<button type="button" className={showArchived?styles.selected:""} onClick={()=>setShowArchived(true)}>ARCHIVES</button></div>
+    <div className={styles.summary}><span>{showArchived ? `${visible.length} ARCHIVED` : serverAuthoritative ? "PERIOD VERIFIED BY SERVER" : `${done} / ${visible.length} CLEARED`}</span><span>{showArchived ? "ARCHIVE" : tab === "once" ? "ONE TIME" : tab.toUpperCase() + " RESET"}</span></div>
     {visible.length === 0 ? <div className={styles.empty}><Target size={34}/><strong>NO ACTIVE QUESTS</strong><p>Le System attend tes missions. Choisis CREATE QUEST pour commencer.</p></div> : <div className={styles.list}>{visible.map(q=>{
-      const finished=today ? hasCompleted(q,data.completions,today) : false; const due=today ? isDue(q,today) : false;
+      const finished=!serverAuthoritative && today ? hasCompleted(q,data.completions,today) : false; const due=serverAuthoritative || (today ? isDue(q,today) : false);
       const arc=data.arcs.find(a=>a.id===q.arcId);
       return <article className={`${styles.item} ${finished?styles.finished:""}`} key={q.id}>
         <div className={styles.questBody}><strong>{q.title}</strong><p>{q.description || "Mission personnelle"}</p><small>{q.difficulty} · {q.attribute.toUpperCase()}{arc?` · ARC: ${arc.title}`:""}{q.targetDate?` · ${q.targetDate}`:""}</small></div>
-        <div className={styles.actions}><span className={styles.reward}>+{q.xp} EXP</span><button type="button" onClick={()=>onComplete(q.id)} disabled={finished||!due} className={styles.complete}>{finished?<><CheckCircle2 size={16}/> CLEARED</>:due?"COMPLETE":"NOT DUE"}</button><button type="button" aria-label={`Modifier ${q.title}`} title="Modifier" onClick={()=>openEdit(q)}><Pencil size={17}/></button><button type="button" aria-label={`Archiver ${q.title}`} title="Archiver" onClick={()=>{ if(window.confirm(`Archiver la quête « ${q.title} » ?`))onArchive(q.id); }}><Archive size={17}/></button></div>
+        <div className={styles.actions}>{!showArchived&&<span className={styles.reward}>+{q.xp} EXP</span>}{showArchived?<button type="button" disabled={!onRestore} onClick={()=>onRestore?.(q.id)}>RESTORE</button>:<><button type="button" onClick={()=>onComplete(q.id)} disabled={finished||!due} className={styles.complete}>{finished?<><CheckCircle2 size={16}/> CLEARED</>:serverAuthoritative?"COMPLETE · SERVER CHECK":due?"COMPLETE":"NOT DUE"}</button><button type="button" aria-label={`Modifier ${q.title}`} title="Modifier" onClick={()=>openEdit(q)}><Pencil size={17}/></button><button type="button" aria-label={`Archiver ${q.title}`} title="Archiver" onClick={()=>{ if(window.confirm(`Archiver la quête « ${q.title} » ?`))onArchive(q.id); }}><Archive size={17}/></button></>}</div>
       </article>;
     })}</div>}
     <div className={styles.arcHead}><div><span className={styles.kicker}>[ LONG TERM OBJECTIVES ]</span><h3>STORY ARCS</h3></div><button type="button" className={styles.secondary} onClick={()=>setShowArc(v=>!v)}><Plus size={15}/> CREATE ARC</button></div>

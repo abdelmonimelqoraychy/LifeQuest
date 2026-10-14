@@ -1,0 +1,21 @@
+{
+  "name": "lifequest-auth2-security-proof",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node security-check.cjs",
+    "test:app": "node app-check.cjs",
+    "test:bundle": "node bundle-check.cjs",
+    "test:auth3": "node auth3-check.cjs",
+    "test:auth3-browser": "node auth3-browser.cjs",
+    "configure:recovery": "node configure-recovery.cjs",
+    "configure:local": "node configure-local.cjs",
+    "local:start": "supabase start --workdir ../..",
+    "local:stop": "supabase stop --workdir ../..",
+    "local:migrate": "supabase migration up --local --workdir ../.."
+  },
+  "devDependencies": {
+    "pg": "8.23.1",
+    "supabase": "2.120.0"
+  }
+}

@@ -4,7 +4,7 @@ import { loadState, localDate, SYSTEM_KEY, LEGACY_KEY, type QuestSystemState } f
 import { getCoreSettings, CORE_KEY, syncAchievements } from '@/lib/hunterCore';
 import { assertBusinessStorageAccess, storageAccessRevision, subscribeStorageAccess, getStorageAccessState } from '@/lib/storageAccess';
 import { useLocalDay } from '@/lib/useLocalDay';
-import { changeQuests, createQuestAction, updateQuestAction, completeQuestAction, emptySystem, type QuestInput, type QuestReward } from '@/lib/questActions';
+import { changeQuests, createQuestAction, updateQuestAction, completeQuestAction, archiveQuestAction, restoreQuestAction, emptySystem, type QuestInput, type QuestReward } from '@/lib/questActions';
 export type { QuestInput, QuestReward };
 type Snapshot = {
     data: QuestSystemState;
@@ -61,7 +61,8 @@ export function useQuestSystem() {
     return { ...state, error: state.error || actionError, today, currentDate: new Date((today || '2000-01-01') + 'T12:00:00'),
         createQuest: (draft: QuestInput) => run(async () => { await createQuestAction(draft); return true; }, false),
         updateQuest: (id: string, draft: QuestInput) => run(async () => { await updateQuestAction(id, draft); return true; }, false),
-        archiveQuest: (id: string) => run(async () => { await changeQuests(prev => ({ ...prev, quests: prev.quests.map(q => q.id === id ? { ...q, archived: true } : q) })); return true; }, false),
+        archiveQuest: (id: string) => run(async () => { await archiveQuestAction(id); return true; }, false),
+        restoreQuest: (id: string) => run(async () => { await restoreQuestAction(id); return true; }, false),
         completeQuest: (id: string) => run(() => completeQuestAction(id), null),
         addArc: (title: string, description: string, targetDate: string) => run(async () => { const now = new Date(), limit = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate()); if (!title.trim() || targetDate < localDate(now) || targetDate > localDate(limit))
             throw Error('Titre ou date invalide'); await changeQuests(prev => ({ ...prev, arcs: [...prev.arcs, { id: crypto.randomUUID(), title: title.trim(), description: description.trim(), targetDate, createdAt: now.toISOString() }] })); return true; }, false),
