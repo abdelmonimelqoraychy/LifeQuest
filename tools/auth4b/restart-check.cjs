@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const {Client}=require('../auth2/node_modules/pg');
+const {status,project}=require('./stack.cjs');
+const {stateHash}=require('./state.cjs');
+let client;
+(async()=>{
+ const report=JSON.parse(fs.readFileSync(path.join(__dirname,'.results',project+'-report.json'),'utf8'));
+ assert.equal(report.project,project);assert.equal(report.fixtureIds.length,2);
+ const url=new URL(status().DB_URL);url.username='supabase_admin';client=new Client({connectionString:url.href});await client.connect();
+ await client.query(fs.readFileSync(path.join(__dirname,'catalog-check.sql'),'utf8'));
+ assert.equal(await stateHash(client,report.fixtureIds),report.stateHash,'STATE_CHANGED_AFTER_RESTART');
+ const versions=(await client.query('select version from supabase_migrations.schema_migrations order by version')).rows.map(r=>r.version);assert.deepEqual(versions,report.migrations);
+ const rows=(await client.query("select rolcanlogin from pg_roles where rolname=any($1::text[])",[['lifequest_schema_owner','lifequest_command_owner','lifequest_read_owner','lifequest_provision_owner']])).rows;assert.equal(rows.length,4);assert.ok(rows.every(r=>!r.rolcanlogin));
+ report.restartVerified=true;
+ fs.writeFileSync(path.join(__dirname,'.results',project+'-report.json'),JSON.stringify(report,null,2));
+ console.log('PASS restart: all twenty tables of both fictional Hunters, migration history and NOLOGIN roles preserved');
+})().catch(e=>{console.error('FAIL restart '+(e.code||'CHECK_FAILED'));process.exitCode=1;}).finally(async()=>{if(client)await client.end().catch(()=>{});});

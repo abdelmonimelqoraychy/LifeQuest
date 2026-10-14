@@ -1,0 +1,15 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
+const {Client}=require('../auth2/node_modules/pg'),stack=require('./stack.cjs');
+const file=path.join(stack.target,'validation','state-before-restart.json');const sha=x=>createHash('sha256').update(x).digest('hex');
+async function collect(){const cfg=stack.status(),u=new URL(cfg.DB_URL);u.username='supabase_admin';const c=new Client({connectionString:u.href});await c.connect();try{
+ const versions=(await c.query('select version from supabase_migrations.schema_migrations order by version')).rows.map(x=>x.version);
+ const tables=(await c.query("select tablename from pg_tables where schemaname='lifequest' order by tablename")).rows.map(x=>x.tablename),tableHashes={};
+ for(const name of tables){assert.match(name,/^[a-z_]+$/);const rows=(await c.query(`select to_jsonb(t) doc from lifequest."${name}" t order by md5(to_jsonb(t)::text)`)).rows;tableHashes[name]={count:rows.length,sha256:sha(rows.map(x=>JSON.stringify(x.doc)).join('\n'))};}
+ const users=(await c.query("select count(*)::int total,count(*) filter(where email like '%@example.test')::int fixtures,count(*) filter(where email not like '%@example.test')::int other from auth.users")).rows[0];
+ assert.equal(users.other,0,'NO_NON_FIXTURE_IDENTITIES');
+ const infra=(await c.query("select (select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('lifequest_auth5_state','lifequest_auth5_command','lifequest_quest_command','lifequest_operations_command','lifequest_lab_command','lifequest_hunter_snapshot','lifequest_command_receipt')) as rpc_count,(select count(*)::int from pg_class where relnamespace='lifequest'::regnamespace and relkind='r' and relrowsecurity and relforcerowsecurity) as force_rls_count,(select count(*)::int from pg_class where relnamespace='lifequest'::regnamespace and relkind='r') as table_count,(select count(*)::int from lifequest.calendar_activation) as calendar_zones")).rows[0];
+ return{project:stack.project,versions,tables,tableHashes,users,infra};
+ }finally{await c.end();}}
+async function main(){fs.mkdirSync(path.dirname(file),{recursive:true});const mode=process.argv[2];if(mode==='capture'){if(fs.existsSync(file))throw Error('BASELINE_EXISTS_REFUSE_OVERWRITE');const state=await collect();fs.writeFileSync(file,JSON.stringify(state,null,2)+'\n',{flag:'wx'});console.log(`PASS captured conservation fingerprint: ${state.tables.length} lifequest tables, ${state.users.total} fictional Auth users, ${state.infra.calendar_zones} local calendar zones`);}else if(mode==='verify'){const before=JSON.parse(fs.readFileSync(file,'utf8')),after=await collect();assert.deepEqual(after,before,'LOCAL_DATA_CHANGED_ACROSS_RESTART');console.log('PASS restart preservation: migration history, all lifequest table hashes, synthetic Auth counts, RLS and calendar activation unchanged');}else throw Error('ACTION_REQUIRED');}
+main().catch(e=>{console.error('FAIL state check '+(e.code||'ASSERTION')+' '+String(e.message).split('\n')[0]);process.exitCode=1;});
