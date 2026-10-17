@@ -48,3 +48,7 @@ dialog{color:inherit;border:0;margin:0;max-width:none;max-height:none;width:100v
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 ::selection{background:#185b83;color:#fff}input,textarea{caret-color:var(--focus)}
 button,a,input,textarea,select{touch-action:manipulation}
+.ob-class-choice{display:grid;gap:12px;margin:20px 0;padding:17px;border:1px solid #2e536b;border-radius:13px;background:#07121dcc;text-align:left}
+.ob-class-choice>div>h2{margin:0 0 6px;color:#eff8ff;font-size:18px;letter-spacing:.01em}
+.ob-class-choice>div>p{margin:0 0 12px;color:#b8c8d7;font-size:13px;line-height:1.5}
+@media(max-width:620px){.ob-class-choice{margin:16px 0;padding:13px}.ob-class-choice>div>h2{font-size:16px}}

@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
 import { verifiedSession } from '@/lib/auth/session';
+import { isHunterClassCode } from '@/lib/hunter/classes';
 
 export const hunterReadHeaders = {
   'Cache-Control': 'private, no-store',
@@ -43,6 +44,8 @@ function validSnapshot(value: unknown, actor: string): boolean {
     value.data.lab.sessions, value.data.lab.challenges,
   ];
   return arrays.every(Array.isArray) && decimal(value.data.system.totalXP)
+    && (value.data.profile.classCode === null || isHunterClassCode(value.data.profile.classCode))
+    && revision(value.data.profile.revision)
     && decimal(value.data.settings.baselineXP) && revision(value.data.settings.revision)
     && value.data.timer !== undefined && (value.data.timer === null || record(value.data.timer));
 }
