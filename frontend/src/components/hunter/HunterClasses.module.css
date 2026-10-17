@@ -1,0 +1,183 @@
+.identity {
+  --class-accent: #79cce0;
+  --class-secondary: #c2d5df;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  color: #edf5fa;
+  background: #111722;
+  border: 1px solid #344252;
+  border-radius: 13px;
+  padding: 13px 15px;
+}
+
+.identityDashboard {
+  background: color-mix(in srgb, var(--class-accent) 8%, #111722);
+  border-color: color-mix(in srgb, var(--class-accent) 36%, #344252);
+}
+
+.identityCore { grid-column: 1 / -1; }
+
+.identitySigil, .choiceMark {
+  display: grid;
+  place-items: center;
+  color: var(--class-accent);
+  background: color-mix(in srgb, var(--class-accent) 11%, #0b111a);
+  border: 1px solid color-mix(in srgb, var(--class-accent) 44%, #344252);
+  border-radius: 12px;
+}
+
+.identitySigil { width: 48px; height: 48px; }
+.identitySigil svg { width: 31px; height: 31px; }
+.identitySigil > span { font: 600 23px/1 Georgia, serif; }
+
+.identityCopy { display: grid; gap: 3px; min-width: 0; }
+.identityCopy strong { color: #f4f7fb; font-size: 15px; line-height: 1.25; }
+.identityCopy > span { color: var(--class-secondary); font-size: 13px; }
+.identityCopy small { color: #aab8c7; font-size: 12px; line-height: 1.4; }
+
+.identityAction, .confirmButton, .cancelButton, .closeButton {
+  min-height: 42px;
+  border: 1px solid #526174;
+  border-radius: 9px;
+  color: #eaf3fa;
+  background: #1a2432;
+  padding: 9px 13px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.identityAction { color: var(--class-accent); border-color: color-mix(in srgb, var(--class-accent) 48%, #344252); white-space: nowrap; }
+.identityAction:hover, .confirmButton:hover { background: #243448; border-color: var(--class-accent); }
+.identityAction:active, .confirmButton:active { transform: translateY(1px); }
+.identityAction:focus-visible, .choice:focus-visible, .noneChoice:focus-visible,
+.confirmButton:focus-visible, .cancelButton:focus-visible, .closeButton:focus-visible {
+  outline: 2px solid #d2f6ff;
+  outline-offset: 3px;
+}
+
+.dialogBackdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 20px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.dialogBackdrop::backdrop { background: #030811db; backdrop-filter: blur(7px); }
+.dialog {
+  width: min(880px, 100%);
+  max-height: min(780px, calc(100dvh - 40px));
+  overflow: auto;
+  color: #edf5fa;
+  background: #0d131d;
+  border: 1px solid #3a4658;
+  border-radius: 15px;
+  padding: clamp(18px, 3vw, 28px);
+  box-shadow: 0 22px 70px #0009;
+}
+
+.dialogHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dialogHeader > div > span { color: #9cadbf; font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+.dialogHeader h2 { margin: 7px 0 0; color: #f7f9fc; font-size: clamp(21px, 3vw, 27px); letter-spacing: -.025em; }
+.closeButton { width: 42px; min-width: 42px; padding: 0; font-size: 25px; font-weight: 400; line-height: 1; }
+.dialogIntro { max-width: 68ch; margin: 12px 0 20px; color: #b2bfcd; font-size: 14px; line-height: 1.55; }
+
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.choicesCompact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice {
+  --class-accent: #79cce0;
+  --class-secondary: #c2d5df;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  min-height: 138px;
+  text-align: left;
+  color: #eaf1f7;
+  background: #121a26;
+  border: 1px solid #344252;
+  border-radius: 12px;
+  padding: 13px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.choice:hover { border-color: color-mix(in srgb, var(--class-accent) 76%, #344252); transform: translateY(-1px); }
+.choiceSelected { background: color-mix(in srgb, var(--class-accent) 12%, #121a26); border-color: var(--class-accent); }
+.choiceHead { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.choiceMark { width: 42px; height: 42px; flex: 0 0 auto; }
+.choiceMark svg { width: 29px; height: 29px; }
+.choiceTitle { display: grid; gap: 3px; min-width: 0; }
+.choiceTitle strong { color: #f4f7fb; font-size: 14px; line-height: 1.25; }
+.choiceTitle small { color: var(--class-secondary); font-size: 12px; line-height: 1.3; }
+.selectedDot { width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--class-accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--class-accent) 18%, transparent); }
+.choiceDescription { color: #bdc8d3; font-size: 12px; line-height: 1.45; }
+.choiceNarrative { color: #d0d9e2; font-size: 12px; line-height: 1.45; }
+.choiceObjective { color: #b9c6d3; font-size: 12px; line-height: 1.45; }
+.choiceObjective b { color: var(--class-secondary); font-weight: 700; }
+.choiceAffinity { color: var(--class-secondary); font-size: 11px; font-weight: 700; letter-spacing: .025em; }
+
+.noneChoice {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 13px;
+  text-align: left;
+  color: #e4ebf2;
+  background: #0e151e;
+  border: 1px dashed #4b596a;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.noneSelected { border-style: solid; border-color: #a9bacb; background: #17202b; }
+.noneMark { width: 30px; height: 30px; display: grid; place-items: center; color: #bdc9d5; font-size: 19px; }
+.noneChoice > span:last-child { display: grid; gap: 2px; }
+.noneChoice strong { font-size: 13px; }
+.noneChoice small { color: #a9b6c4; font-size: 12px; }
+
+.dialogError { color: #ffd7d7; background: #3b2026; border: 1px solid #a6535e; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+.dialogActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.cancelButton { color: #c4ced8; background: transparent; }
+.confirmButton { color: #06141b; background: var(--class-accent, #8fdcf0); border-color: var(--class-accent, #8fdcf0); }
+.cancelButton:disabled, .confirmButton:disabled, .closeButton:disabled { opacity: .55; cursor: wait; }
+
+@media (min-width: 920px) {
+  .choicesCompact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .identity { grid-template-columns: 42px minmax(0, 1fr); gap: 10px; padding: 11px; }
+  .identitySigil { width: 42px; height: 42px; }
+  .identitySigil svg { width: 27px; height: 27px; }
+  .identityCopy strong { font-size: 14px; }
+  .identityCopy > span { font-size: 12px; }
+  .identityCopy small { font-size: 11px; }
+  .identityAction { grid-column: 2; justify-self: start; min-height: 40px; }
+  .choices, .choicesCompact { grid-template-columns: minmax(0, 1fr); }
+  .choice { min-height: 0; }
+  .dialogBackdrop { padding: 8px; }
+  .dialog { max-height: calc(100dvh - 16px); padding: 17px 14px; border-radius: 12px; }
+  .dialogIntro { font-size: 13px; margin-bottom: 13px; }
+  .dialogActions { position: sticky; bottom: -17px; padding: 12px 0 2px; background: #0d131d; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .identityAction, .choice, .confirmButton { transition: none; }
+  .choice:hover, .identityAction:active, .confirmButton:active { transform: none; }
+}

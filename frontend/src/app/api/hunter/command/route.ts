@@ -9,6 +9,7 @@ export const runtime = 'nodejs';
 const questKinds = new Set(['quest.create','quest.update','quest.archive','quest.restore','quest.complete','arc.create','arc.delete','achievement.sync']);
 const operationsKinds = new Set(['boss.create','boss.progress','boss.claim','focus.start','focus.pause','focus.resume','focus.cancel','focus.finish','focus.claim','focus.set_mode']);
 const labKinds = new Set(['idea.create','idea.set_archived','idea.delete','node.create','node.delete','resource.create','resource.set_mastered','resource.delete','journal.save','journal.delete','creativity.submit']);
+const profileKinds = new Set(['profile.class.select']);
 const knownErrors: Record<string, number> = {
   VALIDATION_FAILED: 400, NOT_DUE: 409, NOT_FOUND: 404, REVISION_CONFLICT: 409,
   COMMAND_CONFLICT: 409, COMMAND_UNKNOWN: 400, CALENDAR_NOT_ACTIVE: 503,
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
   catch { return NextResponse.json({ code: 'AUTH_UNAVAILABLE' }, { status: 503, headers: hunterReadHeaders }); }
   if (!session) return NextResponse.json({ code: 'AUTH_REQUIRED' }, { status: 401, headers: hunterReadHeaders });
 
-  const rpc = questKinds.has(input.kind) ? 'lifequest_quest_command'
+  const rpc = profileKinds.has(input.kind) ? 'lifequest_profile_command'
+    : questKinds.has(input.kind) ? 'lifequest_quest_command'
     : operationsKinds.has(input.kind) ? 'lifequest_operations_command'
       : labKinds.has(input.kind) ? 'lifequest_lab_command' : null;
   if (!rpc) return NextResponse.json({ code: 'COMMAND_UNKNOWN' }, { status: 400, headers: hunterReadHeaders });

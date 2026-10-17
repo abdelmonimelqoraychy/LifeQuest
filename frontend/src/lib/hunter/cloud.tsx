@@ -1,12 +1,13 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { HunterClassCode } from '@/lib/hunter/classes';
 
 export type HunterRow = Record<string, unknown>;
 export type HunterSnapshot = {
   schemaVersion: 1; actor: string; revision: string; state: 'ready' | 'setup_pending' | 'migration_pending' | 'recovery_required' | 'onboarding_pending';
   reason?: string; serverTime?: string; timezone?: string;
-  data?: { profile: HunterRow; system: HunterRow & { quests: HunterRow[]; arcs: HunterRow[]; completions: HunterRow[]; achievements: HunterRow[]; totalXP: string };
+  data?: { profile: HunterRow & { classCode: HunterClassCode | null; revision: string }; system: HunterRow & { quests: HunterRow[]; arcs: HunterRow[]; completions: HunterRow[]; achievements: HunterRow[]; totalXP: string };
     extra: HunterRow & { bosses: HunterRow[]; events: HunterRow[] };
     lab: HunterRow & { ideas: HunterRow[]; nodes: HunterRow[]; resources: HunterRow[]; journal: HunterRow[]; sessions: HunterRow[]; challenges: HunterRow[] };
     settings: HunterRow; timer: HunterRow | null };
