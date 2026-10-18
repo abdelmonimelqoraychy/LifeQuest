@@ -1,0 +1,201 @@
+.academy,
+.lessonPage {
+  --academy-bg: #071728;
+  --academy-panel: #0a1c30;
+  --academy-line: #24435e;
+  --academy-text: #e8f6ff;
+  --academy-muted: #a8bfd2;
+  --academy-cyan: #70d9ff;
+  display: grid;
+  width: 100%;
+  max-width: 1420px;
+  gap: 24px;
+  margin: 0 auto;
+  color: var(--academy-text);
+}
+
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+  gap: 28px;
+  align-items: center;
+  padding: clamp(22px, 4vw, 40px);
+  background: #081a2d;
+  border: 1px solid #285071;
+  border-radius: 12px;
+}
+
+.overviewCopy { max-width: 66ch; }
+.eyebrow { margin: 0 0 8px; color: #83d5f5; font-size: 10px; font-weight: 750; letter-spacing: .15em; line-height: 1.5; }
+.overview h2 { max-width: 16ch; margin: 0; color: #f3faff; font: 700 clamp(28px, 4vw, 46px)/1.08 Georgia, 'Times New Roman', serif; letter-spacing: -.025em; }
+.overviewCopy > p:not(.eyebrow) { max-width: 65ch; margin: 15px 0 24px; color: var(--academy-muted); font-size: 14px; line-height: 1.65; }
+
+.progressLine { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; align-items: center; max-width: 580px; color: #c8d9e7; font-size: 12px; }
+.progressLine strong { color: #effaff; font-variant-numeric: tabular-nums; }
+.progressTrack { grid-column: 1 / -1; height: 7px; overflow: hidden; background: #0d2b43; border: 1px solid #285071; border-radius: 99px; }
+.progressTrack > span { display: block; width: 100%; height: 100%; background: #70d9ff; transform-origin: left center; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+
+.levelPath { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); gap: 12px; align-items: center; padding: 22px 18px; background: #061322; border: 1px solid #1e3e59; border-radius: 10px; }
+.levelPath > div { display: grid; gap: 4px; }
+.levelPath > div > span { color: #a7bed0; font-size: 9px; font-weight: 700; letter-spacing: .12em; }
+.levelPath strong { color: #f0faff; font: 700 44px/1 Georgia, 'Times New Roman', serif; }
+.levelPath > div:first-child strong { color: #9ddcf4; }
+.levelPath > div:last-child strong { color: #f1d49a; }
+.levelPath small { color: #abc1d3; font-size: 10px; line-height: 1.45; }
+.levelPath > svg { color: #8fcde7; }
+
+.storageNotice { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 18px; padding: 12px 15px; color: #bdd5e5; font-size: 11px; line-height: 1.5; background: #081a2a; border: 1px solid #29475f; border-radius: 8px; }
+.storageNotice button { padding: 8px 10px; color: #fff0ce; background: #332717; border: 1px solid #8b7044; border-radius: 6px; cursor: pointer; }
+.storageWarning { color: #ffe2b4; background: #211a12; border-color: #785d34; }
+
+.skillsSection { display: grid; gap: 14px; }
+.sectionHeading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 18px; }
+.sectionHeading h2 { margin: 0; color: #f0f8ff; font: 700 clamp(21px, 2.5vw, 28px)/1.2 Georgia, 'Times New Roman', serif; }
+.sectionHeading > span { padding-bottom: 3px; color: var(--academy-muted); font-size: 11px; }
+.skillGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.skillCard { --skill-accent: #70d9ff; display: grid; min-height: 190px; grid-template-rows: auto auto 1fr auto; gap: 12px; padding: 19px; color: inherit; text-decoration: none; background: #081a2c; border: 1px solid #24445f; border-radius: 11px; transition: border-color .18s ease, background-color .18s ease, transform .18s ease; }
+.skillCard:hover { background: #0b2137; border-color: var(--skill-accent); transform: translateY(-2px); }
+.skillCard:focus-visible,
+.backLink:focus-visible,
+.bottomBack:focus-visible,
+.skillNavigation a:focus-visible { outline: 2px solid #c3f2ff; outline-offset: 3px; }
+.cardTop { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--skill-accent); }
+.cardTop > span { display: inline-flex; align-items: center; gap: 5px; color: #aec5d6; font-size: 9px; font-weight: 750; letter-spacing: .1em; }
+.cardTop > span svg { color: #88e0bc; }
+.skillCard h3 { margin: 0; color: #f2f9ff; font: 700 22px/1.1 Georgia, 'Times New Roman', serif; }
+.skillCard > p { max-width: 34ch; margin: 0; color: #b2c7d8; font-size: 12px; line-height: 1.55; }
+.cardBottom { display: flex; justify-content: space-between; align-items: end; gap: 10px; padding-top: 12px; color: #a7bfd1; border-top: 1px solid #1f3c55; font-size: 10px; line-height: 1.45; }
+.cardBottom > span { max-width: 37ch; }
+.cardBottom svg { flex: none; color: var(--skill-accent); }
+
+.academyFooter { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 18px; padding: 15px 0 4px; border-top: 1px solid #1e3b54; }
+.academyFooter > p { max-width: 68ch; margin: 0; color: #a9c0d2; font-size: 10px; line-height: 1.6; }
+.resetButton,.resetConfirm button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 8px 11px; color: #bfd4e3; background: transparent; border: 1px solid #36516a; border-radius: 6px; cursor: pointer; font-size: 10px; }
+.resetButton:hover,.resetConfirm button:hover { color: white; background: #10263a; border-color: #6a96b5; }
+.resetConfirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #ffe6be; font-size: 11px; }
+.resetConfirm button:first-of-type { color: #fff0ce; border-color: #9b7743; background: #322617; }
+
+.lessonPage { gap: 18px; }
+.backLink,.bottomBack { display: inline-flex; width: fit-content; align-items: center; gap: 7px; color: #c1d9e9; font-size: 12px; text-decoration: none; }
+.backLink:hover,.bottomBack:hover { color: white; text-decoration: underline; text-underline-offset: 4px; }
+.lessonIntro { display: flex; align-items: center; gap: 15px; padding: 18px 0 20px; border-bottom: 1px solid #24435e; }
+.lessonMark { display: grid; flex: none; width: 52px; height: 52px; place-items: center; color: var(--skill-accent); background: #0a2034; border: 1px solid #31516b; border-radius: 10px; }
+.lessonIntro .eyebrow { margin-bottom: 4px; }
+.lessonIntro h2 { margin: 0; color: #f4faff; font: 700 clamp(27px, 4vw, 38px)/1.1 Georgia, 'Times New Roman', serif; }
+.lessonIntro p:last-child { margin: 5px 0 0; color: #b2c7d8; font-size: 12px; line-height: 1.5; }
+.completePill { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 8px 10px; color: #b7f0d1; background: #0c2a29; border: 1px solid #2d735b; border-radius: 99px; font-size: 10px; white-space: nowrap; }
+.lessonColumns { display: grid; grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr); gap: 18px; align-items: start; }
+.lessonPanel,.practicePanel { min-width: 0; padding: clamp(18px, 2.4vw, 26px); background: #081a2c; border: 1px solid #24445f; border-radius: 11px; }
+.lessonPanel { position: sticky; top: 15px; }
+.lessonPanel h3 { margin: 0; color: #f2f9ff; font: 700 23px/1.2 Georgia, 'Times New Roman', serif; }
+.objective { margin: 9px 0 17px; color: #c7d9e7; font-size: 12px; font-weight: 650; line-height: 1.55; }
+.lessonText { margin: 0; color: #c0d1df; font-size: 13px; line-height: 1.72; }
+.lessonPanel h4 { margin: 22px 0 10px; color: #eaf7ff; font-size: 12px; }
+.keyPoints { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.keyPoints li { display: grid; grid-template-columns: 16px minmax(0,1fr); gap: 9px; color: #b9ccdb; font-size: 11px; line-height: 1.55; }
+.keyPoints svg { margin-top: 2px; color: var(--skill-accent); }
+.limitNote { margin: 19px 0 0; padding: 12px 13px; color: #ffe5b9; background: #241e14; border: 1px solid #705a35; border-radius: 7px; font-size: 11px; line-height: 1.55; }
+.practicePanel { display: grid; gap: 16px; }
+.exerciseHeading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid #25425b; }
+.exerciseHeading h2 { margin: 0; color: #f0f8ff; font: 700 21px/1.2 Georgia, 'Times New Roman', serif; }
+.exerciseHeading > span { color: #aec3d3; font-size: 10px; }
+.exerciseHeading > svg { flex: none; color: var(--skill-accent); }
+.practicePrompt { max-width: 65ch; margin: 0; color: #bbcedd; font-size: 12px; line-height: 1.55; }
+.transcript { margin: 0; padding: 16px; white-space: pre-line; color: #d5e4ef; background: #061525; border: 1px solid #1e3d56; border-radius: 8px; font-size: 12px; line-height: 1.75; }
+.passage { max-width: 72ch; color: #d1e0eb; font-size: 13px; line-height: 1.75; }
+.passage p { margin: 0 0 15px; }
+.passage p:last-child { margin-bottom: 0; }
+.exercise { display: grid; gap: 15px; padding-top: 17px; border-top: 1px solid #24435e; }
+.exerciseHeading .eyebrow { margin-bottom: 4px; }
+.questions { display: grid; gap: 18px; }
+.question { min-width: 0; margin: 0; padding: 0; border: 0; }
+.question legend { display: flex; align-items: start; gap: 9px; width: 100%; margin-bottom: 10px; color: #e4f1fa; font-size: 13px; font-weight: 650; line-height: 1.55; }
+.question legend > span { display: inline-grid; flex: none; width: 22px; height: 22px; place-items: center; color: var(--skill-accent); background: #0d2b42; border: 1px solid #2d536f; border-radius: 50%; font-size: 10px; }
+.options { display: grid; gap: 7px; }
+.option { display: grid; grid-template-columns: 22px minmax(0,1fr) 18px; gap: 9px; align-items: center; width: 100%; min-height: 42px; padding: 8px 10px; color: #c3d6e4; text-align: left; background: #071727; border: 1px solid #29455d; border-radius: 7px; cursor: pointer; font-size: 11px; line-height: 1.45; }
+.option:hover { color: #f5fbff; border-color: #5a819d; }
+.option > span { display: grid; width: 21px; height: 21px; place-items: center; color: #b6cede; background: #10283c; border-radius: 4px; font-size: 9px; font-weight: 700; }
+.optionSelected { color: #f4fbff; border-color: var(--skill-accent); }
+.optionCorrect { border-color: #498767; background: #0b2725; }
+.optionCorrect > svg { color: #8be1b7; }
+.explanation { margin: 8px 0 0 31px; color: #b8d2c9; font-size: 11px; line-height: 1.55; }
+.explanation strong { color: #a0ebc6; }
+.exerciseFooter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 15px; }
+.exerciseFooter > span,.hint { color: #aac0d0; font-size: 10px; line-height: 1.5; }
+.primaryButton,.secondaryButton,.learnedButton { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; padding: 9px 13px; color: #eaf9ff; background: #104063; border: 1px solid #4384a8; border-radius: 7px; cursor: pointer; font-size: 11px; font-weight: 700; transition: background-color .15s ease, border-color .15s ease; }
+.primaryButton:hover:not(:disabled) { background: #16597c; border-color: #76d8f3; }
+.primaryButton:disabled { color: #9bb0bf; background: #142433; border-color: #304252; cursor: not-allowed; }
+.secondaryButton { color: #c5d8e6; background: transparent; border-color: #38546b; }
+.secondaryButton:hover { background: #102438; border-color: #7395ae; }
+.learnedButton { color: #b9f0d3; background: #0c2a25; border-color: #3b8061; }
+.completedMessage { display: inline-flex; align-items: center; gap: 7px; margin: 0; color: #a9e9c7; font-size: 11px; line-height: 1.5; }
+.promptCard { margin: 0; padding: 18px; color: #edf8ff; background: #061525; border: 1px solid #284861; border-radius: 8px; font: 700 18px/1.5 Georgia, 'Times New Roman', serif; }
+.promptActions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 9px; }
+.promptActions > span { color: #adc2d2; font-size: 10px; }
+.speakingSteps { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: #c0d2df; font-size: 12px; line-height: 1.55; }
+.draftLabel { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; color: #e2f0f8; font-size: 12px; font-weight: 700; }
+.draftLabel span { color: #aec2d1; font-size: 10px; font-weight: 400; }
+.draft { width: 100%; min-height: 190px; resize: vertical; padding: 13px; color: #ecf7ff; background: #061525; border: 1px solid #31516a; border-radius: 7px; font: 13px/1.65 Arial, Helvetica, sans-serif; }
+.draft::placeholder { color: #a7b9c7; opacity: 1; }
+.draft:focus-visible { outline: 2px solid #9de6ff; outline-offset: 2px; }
+.selfReview { display: grid; gap: 10px; margin: 0; padding: 13px; border: 1px solid #2a475e; border-radius: 8px; }
+.selfReview legend { padding: 0 5px; color: #e0edf6; font-size: 11px; font-weight: 700; }
+.selfReview label { display: grid; grid-template-columns: 17px minmax(0,1fr); gap: 9px; align-items: start; color: #bdcfdd; font-size: 11px; line-height: 1.5; cursor: pointer; }
+.selfReview input { width: 16px; height: 16px; margin: 1px 0 0; accent-color: #70d9ff; }
+.flashcardPosition { display: flex; justify-content: space-between; gap: 12px; color: #afc5d5; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+.flashcard { display: grid; min-height: 210px; align-content: center; justify-items: center; gap: 12px; padding: 25px; color: #f1faff; text-align: center; background: #061525; border: 1px solid #36546d; border-radius: 10px; cursor: pointer; }
+.flashcard:hover { border-color: var(--skill-accent); }
+.flashcard strong { font: 700 clamp(24px, 4vw, 34px)/1.15 Georgia, 'Times New Roman', serif; }
+.flashcard span { max-width: 54ch; color: #c4d6e3; font-size: 12px; line-height: 1.6; }
+.flashcard small { color: #a5bfd1; font-size: 10px; }
+.flashcardFlipped strong { color: #dcf3ff; font: 700 18px/1.4 Arial, Helvetica, sans-serif; }
+.flashcardActions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.flashcardActions > button { flex: 1 1 auto; }
+.completeVocabulary { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid #24435e; }
+.completeVocabulary p { margin: 0; color: #bcd0de; font-size: 11px; line-height: 1.5; }
+.skillNavigation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 16px 0; border-top: 1px solid #1f3d56; border-bottom: 1px solid #1f3d56; }
+.skillNavigation > span { margin-right: 5px; color: #aac0d0; font-size: 10px; }
+.skillNavigation a { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 6px 9px; color: #c5d9e7; text-decoration: none; background: #0a1d30; border: 1px solid #2a4861; border-radius: 6px; font-size: 10px; }
+.skillNavigation a:hover { color: #fff; border-color: #6db5d4; }
+.bottomBack { margin-bottom: 5px; }
+
+@media (max-width: 1050px) {
+  .skillGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lessonColumns { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+}
+
+@media (max-width: 760px) {
+  .academy,.lessonPage { gap: 17px; }
+  .overview { grid-template-columns: 1fr; gap: 20px; }
+  .levelPath { max-width: 460px; }
+  .lessonColumns { grid-template-columns: 1fr; }
+  .lessonPanel { position: static; }
+}
+
+@media (max-width: 540px) {
+  .overview { padding: 19px 16px; }
+  .overview h2 { max-width: 14ch; font-size: 30px; }
+  .overviewCopy > p:not(.eyebrow) { font-size: 12px; }
+  .levelPath { gap: 8px; padding: 16px 12px; }
+  .levelPath strong { font-size: 37px; }
+  .levelPath > div > span { font-size: 8px; }
+  .levelPath small { font-size: 9px; }
+  .skillGrid { grid-template-columns: 1fr; }
+  .skillCard { min-height: 160px; }
+  .sectionHeading { align-items: start; flex-direction: column; }
+  .lessonIntro { align-items: start; gap: 11px; }
+  .lessonMark { width: 44px; height: 44px; }
+  .lessonIntro h2 { font-size: 29px; }
+  .completePill { align-self: center; padding: 7px; font-size: 9px; }
+  .lessonPanel,.practicePanel { padding: 17px 14px; }
+  .promptCard { padding: 15px; font-size: 16px; }
+  .flashcardActions { display: grid; grid-template-columns: 1fr 1fr; }
+  .flashcardActions > button:nth-child(2) { grid-column: 1 / -1; grid-row: 1; }
+  .flashcardActions > button:first-child { grid-column: 1; }
+  .flashcardActions > button:last-child { grid-column: 2; }
+  .storageNotice { align-items: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressTrack > span,.skillCard,.primaryButton,.secondaryButton { transition: none; }
+}
