@@ -11,7 +11,7 @@ const operationsKinds = new Set(['boss.create','boss.progress','boss.claim','foc
 const labKinds = new Set(['idea.create','idea.set_archived','idea.delete','node.create','node.delete','resource.create','resource.set_mastered','resource.delete','journal.save','journal.delete','creativity.submit']);
 const profileKinds = new Set(['profile.class.select']);
 const knownErrors: Record<string, number> = {
-  VALIDATION_FAILED: 400, NOT_DUE: 409, NOT_FOUND: 404, REVISION_CONFLICT: 409,
+  VALIDATION_FAILED: 400, NOT_DUE: 409, NOT_FOUND: 404, REVISION_CONFLICT: 409, SOURCE_ALREADY_CONVERTED: 409, MIND_MAP_SOURCE_IN_USE: 409,
   COMMAND_CONFLICT: 409, COMMAND_UNKNOWN: 400, CALENDAR_NOT_ACTIVE: 503,
   CALENDAR_MISMATCH: 503, CALENDAR_UNVERIFIED: 503, SESSION_EXPIRED: 401, ACCOUNT_MISSING: 409,
   SNAPSHOT_INCONSISTENT: 409, UNSUPPORTED_NUMBER: 409, ONCE_TERMINAL: 409,
