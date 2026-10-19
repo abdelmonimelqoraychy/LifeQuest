@@ -30,6 +30,8 @@ const safeError: Record<string, string> = {
   CALENDAR_UNVERIFIED: 'Les crédits sont suspendus car le calendrier de cette cible n’a pas été validé.',
   COMMAND_UNAVAILABLE: 'La commande n’a pas pu être confirmée. Vérifiez son reçu avant de réessayer.',
   COMMAND_RESULT_INVALID: 'Le serveur a renvoyé un résultat incohérent.', REVISION_CONFLICT: 'Cette donnée a changé ailleurs. Les données ont été rechargées.',
+  MIND_MAP_SOURCE_IN_USE: 'Ce nœud Mind Map est conservé comme source d’un Boss existant.',
+  SOURCE_ALREADY_CONVERTED: 'Cette branche Mind Map est déjà associée à un Boss.',
   NOT_DUE: 'Cette action n’est pas disponible pour le moment.', NOT_FOUND: 'Cette donnée n’est plus disponible.',
   VALIDATION_FAILED: 'Les informations saisies ne sont pas valides.', FOCUS_STATE_INVALID: 'Cet état de session Focus ne permet pas cette action.',
   FOCUS_DURATION_UNVERIFIED: 'La durée doit être vérifiée par le serveur avant de terminer la session.',
