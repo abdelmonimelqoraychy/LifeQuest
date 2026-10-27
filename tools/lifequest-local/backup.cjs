@@ -1,7 +1,12 @@
 'use strict';
-// Creates a private custom-format dump from this exact local PostgreSQL target.
-// The dump contains the complete database; no row contents are printed.
-const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process'),{createHash}=require('node:crypto');
-const stack=require('./stack.cjs');
-function main(){stack.verify();stack.status();const container=stack.databaseContainer();const bytes=execFileSync('docker',['exec',container,'pg_dump','-U','supabase_admin','-Fc','--no-owner','--no-acl','postgres'],{env:stack.env,encoding:null,stdio:['ignore','pipe','pipe'],maxBuffer:1024*1024*1024,timeout:300000});if(bytes.length<1024)throw Error('BACKUP_ARCHIVE_TOO_SMALL');const dir=path.join(stack.target,'backups');fs.mkdirSync(dir,{recursive:true});const stamp=new Date().toISOString().replace(/[:.]/g,'-'),archive=path.join(dir,stack.project+'-'+stamp+'.dump');fs.writeFileSync(archive,bytes,{flag:'wx',mode:0o600});const sha256=createHash('sha256').update(bytes).digest('hex');const manifest={project:stack.project,createdAt:new Date().toISOString(),database:'postgres',format:'custom',bytes:bytes.length,sha256,includesAllDatabaseData:true,restoreTargetMustBeIndependent:true};fs.writeFileSync(archive+'.json',JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});console.log(`PASS local PostgreSQL backup created: ${path.basename(archive)} (${bytes.length} bytes; SHA-256 ${sha256}); full database contents included`);}
-try{if(process.argv[2]!=='backup')throw Error('ACTION_REQUIRED');main();}catch(e){console.error('FAIL backup '+(e.code||e.message||'BACKUP_FAILED'));process.exitCode=1;}
+
+// Stable simple command retained for documentation and existing callers.
+// This is the unencrypted PostgreSQL custom-format backup path.
+const { runPersonalBackup, formatBackupError } = require('./plain-backup.cjs');
+
+if (require.main === module) runPersonalBackup().catch(error => {
+  console.error(formatBackupError(error?.code));
+  process.exitCode = 1;
+});
+
+module.exports = { runPersonalBackup };
