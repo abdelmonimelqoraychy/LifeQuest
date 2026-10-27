@@ -36,6 +36,7 @@ const safeError: Record<string, string> = {
   VALIDATION_FAILED: 'Les informations saisies ne sont pas valides.', FOCUS_STATE_INVALID: 'Cet état de session Focus ne permet pas cette action.',
   FOCUS_DURATION_UNVERIFIED: 'La durée doit être vérifiée par le serveur avant de terminer la session.',
   HISTORICAL_FOCUS_UNVERIFIED: 'Cette session historique ne peut pas recevoir de crédit automatiquement.',
+  FOCUS_TARGET_UNAVAILABLE: 'Cet objectif n’est plus disponible. Actualisez le snapshot et choisissez une cible encore active.',
 };
 
 export function HunterCloudProvider({ actor, initial, children }: { actor: string; initial: HunterSnapshot; children: ReactNode }) {
@@ -101,8 +102,9 @@ export function HunterCloudProvider({ actor, initial, children }: { actor: strin
         }
         uncertainCommand.current = null;
         setHasUncertainCommand(false);
-        setError(safeError[value.code || ''] || 'La commande a été refusée.');
-        if (value.code === 'REVISION_CONFLICT') await refresh();
+        const message = safeError[value.code || ''] || 'La commande a été refusée.';
+        setError(message);
+        if (value.code === 'REVISION_CONFLICT' || value.code === 'FOCUS_TARGET_UNAVAILABLE') { await refresh(); setError(message); }
         return null;
       }
       requests.current.delete(intent); uncertainCommand.current = null; setHasUncertainCommand(false);
